@@ -1,0 +1,8 @@
+
+--- 2026-06-10T16:11:10.833Z debug
+🪵  Writing logs to "/Users/daniel/Documents/sjlab-app/.wrangler-logs/wrangler-2026-06-10_16-11-10_732.log"
+---
+
+--- 2026-06-10T16:11:10.833Z debug
+local dev variables file not found at ".dev.vars". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---

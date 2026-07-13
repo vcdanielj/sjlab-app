@@ -1,0 +1,87 @@
+/* ============================================
+   SJ Lab — Expense Categories Page Styles
+   ============================================ */
+
+.backBtn { font-size: var(--text-sm); color: var(--color-text-secondary); cursor: pointer; transition: color var(--transition-fast); margin-bottom: 8px; display: inline-block; }
+.backBtn:hover { color: var(--color-text); }
+
+.header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 16px; }
+.title { font-size: var(--text-2xl); font-weight: var(--weight-bold); letter-spacing: -0.02em; color: var(--color-text); }
+.subtitle { font-size: var(--text-sm); color: var(--color-text-secondary); margin-top: 4px; }
+
+.list { display: flex; flex-direction: column; gap: 8px; }
+
+.catItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+  animation: slideUp var(--transition-base) ease both;
+  box-shadow: var(--shadow-card);
+}
+
+.catItem:hover { box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+
+.catLeft { display: flex; align-items: center; gap: 12px; }
+
+.catDot { width: 12px; height: 12px; border-radius: var(--radius-full); flex-shrink: 0; box-shadow: 0 0 0 2px white, 0 0 0 3px color-mix(in srgb, currentColor 20%, transparent); }
+
+.catName { font-weight: var(--weight-medium); font-size: var(--text-sm); color: var(--color-text); }
+
+.inactiveBadge { font-size: 10px; padding: 2px 8px; border-radius: var(--radius-full); background: var(--color-bg-tertiary); color: var(--color-text-tertiary); font-weight: var(--weight-semibold); }
+
+.catActions { display: flex; gap: 6px; }
+
+.actionBtn {
+  padding: 4px 12px;
+  font-size: var(--text-xs);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.actionBtn:hover { border-color: var(--color-text-tertiary); color: var(--color-text); }
+.actionBtnDanger:hover { border-color: var(--color-danger); color: var(--color-danger); background: var(--color-danger-light); }
+
+/* Color picker */
+.fieldLabel { display: block; font-size: var(--text-sm); font-weight: var(--weight-medium); color: var(--color-text); margin-bottom: 6px; }
+
+.colorGrid { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.colorSwatch {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.colorSwatch:hover { transform: scale(1.1); }
+.colorSwatch.colorSelected { border-color: var(--color-text); box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-text); transform: scale(1.1); }
+
+/* Modal */
+.modalOverlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); z-index: var(--z-modal); display: flex; align-items: center; justify-content: center; padding: 16px; animation: fadeIn 0.15s ease; }
+.modal { background: var(--color-bg); border-radius: var(--radius-xl); box-shadow: var(--shadow-xl); width: 100%; max-width: 420px; padding: 28px; animation: slideUp 0.2s ease; }
+.modalTitle { font-size: var(--text-lg); font-weight: var(--weight-bold); color: var(--color-text); margin-bottom: 20px; }
+.modalFields { display: flex; flex-direction: column; gap: 16px; }
+.modalActions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+/* Loading & Empty */
+.loadingWrap { display: flex; align-items: center; justify-content: center; padding: 60px; }
+.spinner { width: 28px; height: 28px; border: 3px solid var(--color-border); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.emptyWrap { text-align: center; padding: 60px 20px; color: var(--color-text-tertiary); font-size: var(--text-sm); display: flex; flex-direction: column; align-items: center; gap: 16px; }
+
+@media (max-width: 640px) {
+  .catItem { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .header { flex-direction: column; }
+}

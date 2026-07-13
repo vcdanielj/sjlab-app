@@ -1,0 +1,29 @@
+{
+	"version": 1,
+	"accepted": true,
+	"date": "2026-05-29T19:48:30.396Z",
+	"detectedAgents": [
+		{
+			"name": "Claude Code",
+			"rosie": {
+				"id": "claude",
+				"globalPath": "/Users/daniel/.claude/skills"
+			}
+		},
+		{
+			"name": "Cursor",
+			"rosie": {
+				"id": "cursor",
+				"globalPath": "/Users/daniel/.cursor/skills"
+			}
+		},
+		{
+			"name": "Windsurf",
+			"rosie": {
+				"id": "windsurf",
+				"globalPath": "/Users/daniel/.windsurf/skills"
+			}
+		}
+	],
+	"installFailed": false
+}

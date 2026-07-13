@@ -1,0 +1,248 @@
+.banner {
+  position: fixed;
+  /* iOS / notched Android: respetar safe-areas */
+  left: calc(16px + env(safe-area-inset-left, 0px));
+  right: calc(16px + env(safe-area-inset-right, 0px));
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: var(--z-toast, 500);
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  animation: slideUp 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Que no rompa layouts en horizontal ni en alturas bajas */
+  max-height: calc(100vh - 32px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  overflow: hidden;
+}
+
+.icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0; /* permite ellipsis/truncado */
+}
+
+.text strong {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1.3;
+  color: var(--color-text);
+}
+
+.text span {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  /* Mejor lectura en multilínea */
+  word-break: break-word;
+}
+
+.text em {
+  font-style: normal;
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+}
+
+.text kbd {
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-weight: var(--weight-semibold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  font-size: 12px;
+  line-height: 1;
+  color: var(--color-text);
+  vertical-align: -3px;
+  margin: 0 2px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.installBtn {
+  appearance: none;
+  border: none;
+  background: var(--color-primary);
+  color: #fff;
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  /* Mínimo 44px de alto (Apple HIG / WCAG) */
+  min-height: 40px;
+  white-space: nowrap;
+}
+
+.installBtn:hover {
+  background: var(--color-primary-dark);
+}
+
+.installBtn:active {
+  background: var(--color-primary-darker);
+  transform: scale(0.97);
+}
+
+.installBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.close {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: var(--color-text-tertiary);
+  /* Tamaño táctil mínimo 44x44 */
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  font-size: 22px;
+  line-height: 1;
+  padding: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.close:hover {
+  color: var(--color-text);
+  background: var(--color-bg-hover);
+}
+
+.close:active {
+  background: var(--color-bg-active);
+}
+
+.close:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banner {
+    animation: none;
+  }
+}
+
+/* ---------- Móvil (≥ 480px): un poco más de aire ---------- */
+@media (min-width: 480px) {
+  .banner {
+    padding: 14px 16px;
+    gap: 14px;
+  }
+  .icon {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ---------- Tablet+: esquinas más pegadas al viewport ---------- */
+@media (min-width: 768px) {
+  .banner {
+    left: auto;
+    right: calc(24px + env(safe-area-inset-right, 0px));
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    max-width: 420px;
+    padding: 16px 18px;
+  }
+}
+
+/* ---------- Desktop grande: limitar aún más el ancho ---------- */
+@media (min-width: 1280px) {
+  .banner {
+    right: calc(32px + env(safe-area-inset-right, 0px));
+    bottom: calc(32px + env(safe-area-inset-bottom, 0px));
+    max-width: 440px;
+  }
+}
+
+/* ---------- Móvil muy estrecho (≤ 360px): comprimir ---------- */
+@media (max-width: 359px) {
+  .banner {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  .icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+  }
+  .installBtn {
+    padding: 8px 12px;
+    font-size: var(--text-xs);
+    min-height: 36px;
+  }
+  .close {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    font-size: 20px;
+  }
+}
+
+/* ---------- Landscape móvil: no ocupar tanto vertical ---------- */
+@media (orientation: landscape) and (max-height: 500px) {
+  .banner {
+    padding: 8px 12px;
+    gap: 10px;
+    max-height: 70vh;
+  }
+  .icon {
+    width: 32px;
+    height: 32px;
+  }
+  .installBtn {
+    min-height: 36px;
+    padding: 8px 14px;
+  }
+}

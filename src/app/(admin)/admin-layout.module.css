@@ -1,0 +1,31 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  padding: var(--space-8);
+  background: var(--color-bg-secondary);
+  min-height: 100vh;
+  transition: margin-left var(--transition-slow);
+}
+
+.mainCollapsed {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+@media (max-width: 768px) {
+  .main {
+    margin-left: 0;
+    padding: var(--space-4);
+    padding-top: calc(var(--space-4) + 48px); /* Space for hamburger */
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .main {
+    margin-left: var(--sidebar-collapsed-width);
+  }
+}

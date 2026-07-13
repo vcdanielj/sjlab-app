@@ -1,0 +1,110 @@
+/* ============================================
+   SJ Lab — Settings Page Styles
+   ============================================ */
+
+.title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+  margin-bottom: 28px;
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-card);
+  animation: slideUp var(--transition-base) ease both;
+}
+
+.card:nth-child(1) { animation-delay: 0ms; }
+.card:nth-child(2) { animation-delay: 60ms; }
+.card:nth-child(3) { animation-delay: 120ms; }
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-light);
+}
+
+.cardIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+}
+
+.card:hover .cardIcon {
+  transform: scale(1.05);
+}
+
+.cardContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.cardTitle {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.cardDesc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.cardArrow {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.card:hover .cardArrow {
+  transform: translateX(3px);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .cardIcon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .cardTitle {
+    font-size: var(--text-sm);
+  }
+
+  .cardDesc {
+    font-size: var(--text-xs);
+  }
+}

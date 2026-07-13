@@ -1,0 +1,258 @@
+/* ============================================
+   Clients Directory Page
+   ============================================ */
+
+.title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-5);
+  gap: var(--space-4);
+}
+
+/* ---- Filters ---- */
+.filters {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.searchWrap {
+  flex: 1;
+  position: relative;
+  max-width: 400px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: var(--space-2) var(--space-3) var(--space-2) 36px;
+  font-size: var(--text-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition-fast);
+  background: var(--color-bg);
+}
+
+.searchInput:focus {
+  border-color: var(--color-primary);
+}
+
+.searchInput::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.filterGroup {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.filterSelect {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  outline: none;
+  cursor: pointer;
+}
+
+/* ---- Table ---- */
+.tableContainer {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  box-shadow: var(--shadow-card);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-tertiary);
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.table td {
+  padding: 14px var(--space-4);
+  font-size: var(--text-sm);
+  border-bottom: 1px solid var(--color-border-light);
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.row {
+  transition: background var(--transition-fast);
+}
+
+.row:hover {
+  background: rgba(59, 130, 246, 0.03);
+}
+
+.row td {
+  cursor: pointer;
+}
+
+.row.inactive {
+  opacity: 0.55;
+}
+
+.nameCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: white;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.nameGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.clientName {
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+}
+
+.clinicName {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+.phone {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.muted {
+  color: var(--color-text-tertiary);
+}
+
+.balance {
+  font-weight: var(--weight-semibold);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.balance.positive {
+  color: var(--color-success-dark);
+}
+
+.balance.negative {
+  color: var(--color-danger);
+}
+
+.balanceLabel {
+  font-weight: var(--weight-normal);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  opacity: 0.7;
+}
+
+.date {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.sortableHeader {
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.sortableHeader:hover {
+  color: var(--color-text) !important;
+  background-color: var(--color-bg-hover);
+}
+
+.headerSortIcon {
+  display: inline-flex;
+  align-items: center;
+  margin-left: var(--space-1);
+  vertical-align: middle;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+/* ---- Pagination ---- */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+.pageInfo {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .searchWrap {
+    max-width: none;
+  }
+
+  .table th:nth-child(2),
+  .table td:nth-child(2),
+  .table th:nth-child(5),
+  .table td:nth-child(5) {
+    display: none;
+  }
+}

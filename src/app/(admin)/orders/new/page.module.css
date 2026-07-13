@@ -1,0 +1,406 @@
+/* ============================================
+   Create Order Page
+   ============================================ */
+
+.container {
+  width: min(980px, 100%);
+  max-width: 980px;
+}
+
+.header { margin-bottom: var(--space-6); }
+
+.backBtn {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-3);
+  display: inline-block;
+  transition: color var(--transition-fast);
+}
+.backBtn:hover { color: var(--color-text); }
+
+.title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}
+
+.form {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-shadow: var(--shadow-card);
+}
+
+.topGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.fieldSpanTwo {
+  grid-column: 1 / -1;
+}
+
+.notesField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.colorField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.jobsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.jobsHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.jobsTitle {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.jobsSubtitle {
+  margin-top: 4px;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.jobsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-3);
+}
+
+.jobCard {
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.jobCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.jobCardTitle {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.removeJobBtn {
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+}
+
+.removeJobBtn:hover {
+  text-decoration: underline;
+}
+
+.jobMetaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-secondary);
+}
+
+.jobMetaLabel {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.jobMetaValue {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+  text-align: right;
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+}
+
+.colorSelector {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  padding: var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  text-align: left;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.colorSelector:hover {
+  border-color: var(--color-primary);
+}
+
+.colorSelector:focus-visible {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.colorSelectorMain {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.colorSelectorText {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+}
+
+.colorSelectorStandard {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.colorActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.colorPreview {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.colorSwatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  flex-shrink: 0;
+}
+
+.clearColorBtn {
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+}
+
+.clearColorBtn:hover {
+  text-decoration: underline;
+}
+
+.textarea {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  resize: vertical;
+  outline: none;
+  font-family: var(--font-sans);
+  transition: border-color var(--transition-fast);
+}
+.textarea:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.48);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  z-index: 1000;
+}
+
+.modalCard {
+  width: min(760px, 100%);
+  max-height: min(80vh, 720px);
+  overflow: auto;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.modalTitle {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+}
+
+.modalSubtitle {
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.modalClose {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.modalClose:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text);
+}
+
+.standardTabs {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.standardTab {
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  transition: all var(--transition-fast);
+}
+
+.standardTabActive {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-3);
+}
+
+.colorOption {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.colorOption:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.colorOptionActive {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.colorOptionTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.colorSwatchLarge {
+  width: 100%;
+  height: 28px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+}
+
+.colorHex {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.colorCode {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.colorName {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border-light);
+}
+
+@media (max-width: 640px) {
+  .form { padding: var(--space-4); }
+  .modalCard { padding: var(--space-4); }
+  .modalActions { flex-direction: column-reverse; }
+  .jobsHeader { flex-direction: column; }
+  .topGrid { grid-template-columns: 1fr; }
+  .jobMetaRow { flex-direction: column; align-items: flex-start; }
+  .jobsList { grid-template-columns: 1fr; }
+}

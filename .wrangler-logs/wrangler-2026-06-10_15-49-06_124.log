@@ -1,0 +1,65 @@
+
+--- 2026-06-10T15:49:06.207Z debug
+🪵  Writing logs to "/Users/daniel/Documents/sjlab-app/.wrangler-logs/wrangler-2026-06-10_15-49-06_124.log"
+---
+
+--- 2026-06-10T15:49:06.207Z debug
+.env file not found at "/Users/daniel/Documents/sjlab-app/.env". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-06-10T15:49:06.207Z debug
+.env file not found at "/Users/daniel/Documents/sjlab-app/.env.local". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-06-10T15:49:06.212Z log
+
+ ⛅️ wrangler 4.97.0 (update available 4.99.0)
+─────────────────────────────────────────────
+---
+
+--- 2026-06-10T15:49:06.214Z log
+Resource location: remote 
+
+---
+
+--- 2026-06-10T15:49:06.226Z debug
+fetching auth token grant_type=refresh_token&refresh_token=cfort_OEbDgriJg6NmyR50HoCZ8lMTerYGtQAPXUt54mSTmMg.6Ne60yi_pwbML22kSpynYtBAXbhnMsrrfdxP8NdxCiY&client_id=54d11594-84e4-41aa-b438-e81b8fa78ee7
+---
+
+--- 2026-06-10T15:49:06.226Z debug
+Checking if domain has Access enabled: dash.cloudflare.com
+---
+
+--- 2026-06-10T15:49:06.226Z debug
+Access switch not cached for: dash.cloudflare.com
+---
+
+--- 2026-06-10T15:49:06.245Z debug
+Metrics dispatcher: Posting data {"deviceId":"406b576e-1ec8-4121-a23c-80f2833ef1d9","event":"wrangler command started","timestamp":1781106546245,"properties":{"amplitude_session_id":1781106546217,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"toml","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":true,"agent":null,"argsUsed":["remote"],"argsCombination":"remote","sanitizedCommand":"d1 migrations apply","sanitizedArgs":{"remote":true},"currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T15:49:06.538Z debug
+Caching access switch for: dash.cloudflare.com
+---
+
+--- 2026-06-10T15:49:06.538Z debug
+Fetching auth token from https://dash.cloudflare.com/oauth2/token
+---
+
+--- 2026-06-10T15:49:07.180Z error
+✘ [ERROR] Failed to fetch auth token: 400 Bad Request
+
+
+---
+
+--- 2026-06-10T15:49:07.182Z debug
+Token refresh failed: [object Object]
+---
+
+--- 2026-06-10T15:49:07.182Z log
+Attempting to login via OAuth...
+---
+
+--- 2026-06-10T15:49:07.186Z log
+Opening a link in your default browser: https://dash.cloudflare.com/oauth2/auth?response_type=code&client_id=54d11594-84e4-41aa-b438-e81b8fa78ee7&redirect_uri=http%3A%2F%2Flocalhost%3A8976%2Foauth%2Fcallback&scope=account%3Aread%20user%3Aread%20workers%3Awrite%20workers_kv%3Awrite%20workers_routes%3Awrite%20workers_scripts%3Awrite%20workers_tail%3Aread%20d1%3Awrite%20pages%3Awrite%20zone%3Aread%20ssl_certs%3Awrite%20ai%3Awrite%20ai-search%3Awrite%20ai-search%3Arun%20websearch.run%20agent-memory%3Awrite%20queues%3Awrite%20pipelines%3Awrite%20secrets_store%3Awrite%20artifacts%3Awrite%20flagship%3Awrite%20containers%3Awrite%20cloudchamber%3Awrite%20connectivity%3Aadmin%20email_routing%3Awrite%20email_sending%3Awrite%20browser%3Awrite%20offline_access&state=rRa8Zal_LASTGUWFkkmL1IGkD3LRqwOx&code_challenge=Tjnyfgaw-2weMVJg6YMcW5rcPo3Lw8IRP4FVOfekBQg&code_challenge_method=S256
+---

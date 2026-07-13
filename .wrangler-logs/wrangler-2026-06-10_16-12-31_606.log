@@ -1,0 +1,61 @@
+
+--- 2026-06-10T16:12:31.683Z debug
+🪵  Writing logs to "/Users/daniel/Documents/sjlab-app/.wrangler-logs/wrangler-2026-06-10_16-12-31_606.log"
+---
+
+--- 2026-06-10T16:12:31.683Z debug
+.env file not found at "/Users/daniel/Documents/sjlab-app/.env". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-06-10T16:12:31.683Z debug
+.env file not found at "/Users/daniel/Documents/sjlab-app/.env.local". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-06-10T16:12:31.691Z log
+
+ ⛅️ wrangler 4.97.0 (update available 4.99.0)
+─────────────────────────────────────────────
+---
+
+--- 2026-06-10T16:12:31.702Z debug
+Running autoconfig detection in /Users/daniel/Documents/sjlab-app...
+---
+
+--- 2026-06-10T16:12:31.702Z debug
+Metrics dispatcher: Posting data {"deviceId":"4ae14535-55f6-4f56-9314-2c9c0d0c3c93","event":"wrangler command started","timestamp":1781107951702,"properties":{"amplitude_session_id":1781107951696,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"toml","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":true,"agent":null,"argsUsed":[],"argsCombination":"","sanitizedCommand":"deploy","sanitizedArgs":{},"currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T16:12:31.705Z debug
+Metrics dispatcher: Posting data {"deviceId":"4ae14535-55f6-4f56-9314-2c9c0d0c3c93","event":"autoconfig_process_started","timestamp":1781107951705,"properties":{"amplitude_session_id":1781107951702,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"none","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":false,"agent":null,"category":"Workers","os":"darwin:arm64","autoConfigId":"e8fd5a68-0e5e-4cf4-a2f3-d6a19eaafad8","command":"wrangler deploy","dryRun":false,"currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T16:12:31.706Z debug
+Metrics dispatcher: Posting data {"deviceId":"4ae14535-55f6-4f56-9314-2c9c0d0c3c93","event":"autoconfig_detection_started","timestamp":1781107951706,"properties":{"amplitude_session_id":1781107951702,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"none","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":false,"agent":null,"category":"Workers","os":"darwin:arm64","autoConfigId":"e8fd5a68-0e5e-4cf4-a2f3-d6a19eaafad8","command":"wrangler deploy","currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T16:12:31.725Z debug
+Metrics dispatcher: Posting data {"deviceId":"4ae14535-55f6-4f56-9314-2c9c0d0c3c93","event":"autoconfig_process_ended","timestamp":1781107951725,"properties":{"amplitude_session_id":1781107951702,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"none","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":false,"agent":null,"category":"Workers","os":"darwin:arm64","autoConfigId":"e8fd5a68-0e5e-4cf4-a2f3-d6a19eaafad8","command":"wrangler deploy","dryRun":false,"success":true,"currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T16:12:31.773Z log
+
+---
+
+--- 2026-06-10T16:12:31.800Z error
+✘ [ERROR] In a non-interactive environment, it's necessary to set a CLOUDFLARE_API_TOKEN environment variable for wrangler to work. Please go to https://developers.cloudflare.com/fundamentals/api/get-started/create-token/ for instructions on how to create an api token, and assign its value to CLOUDFLARE_API_TOKEN.
+
+
+---
+
+--- 2026-06-10T16:12:31.811Z debug
+Error: In a non-interactive environment, it's necessary to set a CLOUDFLARE_API_TOKEN environment variable for wrangler to work. Please go to https://developers.cloudflare.com/fundamentals/api/get-started/create-token/ for instructions on how to create an api token, and assign its value to CLOUDFLARE_API_TOKEN.
+    at requireAuth (/Users/daniel/Documents/sjlab-app/node_modules/wrangler/wrangler-dist/cli.js:139191:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Object.handler (/Users/daniel/Documents/sjlab-app/node_modules/wrangler/wrangler-dist/cli.js:237083:50)
+    at async /Users/daniel/Documents/sjlab-app/node_modules/wrangler/wrangler-dist/cli.js:185004:26
+    at async Object.handler (/Users/daniel/Documents/sjlab-app/node_modules/wrangler/wrangler-dist/cli.js:184953:7)
+---
+
+--- 2026-06-10T16:12:31.811Z debug
+Metrics dispatcher: Posting data {"deviceId":"4ae14535-55f6-4f56-9314-2c9c0d0c3c93","event":"wrangler command errored","timestamp":1781107951811,"properties":{"amplitude_session_id":1781107951696,"amplitude_event_id":1,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"toml","isCI":true,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":true,"agent":null,"argsUsed":[],"argsCombination":"","sanitizedCommand":"deploy","sanitizedArgs":{},"durationMs":89,"errorType":"UserError","errorMessage":"user auth missing api token non interactive","currentAgentSkillsInstalled":null}}
+---

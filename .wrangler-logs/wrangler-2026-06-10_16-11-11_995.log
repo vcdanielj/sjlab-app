@@ -1,0 +1,46 @@
+
+--- 2026-06-10T16:11:12.117Z debug
+🪵  Writing logs to "/Users/daniel/Documents/sjlab-app/.wrangler-logs/wrangler-2026-06-10_16-11-11_995.log"
+---
+
+--- 2026-06-10T16:11:12.117Z debug
+.env file not found at "/Users/daniel/Documents/sjlab-app/.env". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-06-10T16:11:12.117Z debug
+.env file not found at "/Users/daniel/Documents/sjlab-app/.env.local". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-06-10T16:11:12.125Z log
+
+ ⛅️ wrangler 4.97.0 (update available 4.99.0)
+─────────────────────────────────────────────
+---
+
+--- 2026-06-10T16:11:12.138Z debug
+Running autoconfig detection in /Users/daniel/Documents/sjlab-app...
+---
+
+--- 2026-06-10T16:11:12.138Z debug
+Metrics dispatcher: Posting data {"deviceId":"4ae14535-55f6-4f56-9314-2c9c0d0c3c93","event":"wrangler command started","timestamp":1781107872138,"properties":{"amplitude_session_id":1781107872130,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"toml","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":true,"agent":null,"argsUsed":[],"argsCombination":"","sanitizedCommand":"deploy","sanitizedArgs":{},"currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T16:11:12.143Z debug
+Metrics dispatcher: Posting data {"deviceId":"4ae14535-55f6-4f56-9314-2c9c0d0c3c93","event":"autoconfig_process_started","timestamp":1781107872143,"properties":{"amplitude_session_id":1781107872138,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"none","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":false,"agent":null,"category":"Workers","os":"darwin:arm64","autoConfigId":"9831c669-5bc5-45f0-9d03-66db74b7ed81","command":"wrangler deploy","dryRun":false,"currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T16:11:12.143Z debug
+Metrics dispatcher: Posting data {"deviceId":"4ae14535-55f6-4f56-9314-2c9c0d0c3c93","event":"autoconfig_detection_started","timestamp":1781107872143,"properties":{"amplitude_session_id":1781107872138,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"none","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":false,"agent":null,"category":"Workers","os":"darwin:arm64","autoConfigId":"9831c669-5bc5-45f0-9d03-66db74b7ed81","command":"wrangler deploy","currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T16:11:12.161Z debug
+Metrics dispatcher: Posting data {"deviceId":"4ae14535-55f6-4f56-9314-2c9c0d0c3c93","event":"autoconfig_process_ended","timestamp":1781107872161,"properties":{"amplitude_session_id":1781107872138,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"none","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":false,"agent":null,"category":"Workers","os":"darwin:arm64","autoConfigId":"9831c669-5bc5-45f0-9d03-66db74b7ed81","command":"wrangler deploy","dryRun":false,"success":true,"currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T16:11:12.203Z log
+Attempting to login via OAuth...
+---
+
+--- 2026-06-10T16:11:12.205Z log
+Opening a link in your default browser: https://dash.cloudflare.com/oauth2/auth?response_type=code&client_id=54d11594-84e4-41aa-b438-e81b8fa78ee7&redirect_uri=http%3A%2F%2Flocalhost%3A8976%2Foauth%2Fcallback&scope=account%3Aread%20user%3Aread%20workers%3Awrite%20workers_kv%3Awrite%20workers_routes%3Awrite%20workers_scripts%3Awrite%20workers_tail%3Aread%20d1%3Awrite%20pages%3Awrite%20zone%3Aread%20ssl_certs%3Awrite%20ai%3Awrite%20ai-search%3Awrite%20ai-search%3Arun%20websearch.run%20agent-memory%3Awrite%20queues%3Awrite%20pipelines%3Awrite%20secrets_store%3Awrite%20artifacts%3Awrite%20flagship%3Awrite%20containers%3Awrite%20cloudchamber%3Awrite%20connectivity%3Aadmin%20email_routing%3Awrite%20email_sending%3Awrite%20browser%3Awrite%20offline_access&state=W6V9sXdIhKtR_wTxKs~1viwYJhcX6o_s&code_challenge=75CZKqnZgNottuCyFkiozgEp_r6XCGtV9xdnVmaUFtI&code_challenge_method=S256
+---

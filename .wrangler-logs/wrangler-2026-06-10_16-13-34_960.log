@@ -1,0 +1,1027 @@
+
+--- 2026-06-10T16:13:35.038Z debug
+🪵  Writing logs to "/Users/daniel/Documents/sjlab-app/.wrangler-logs/wrangler-2026-06-10_16-13-34_960.log"
+---
+
+--- 2026-06-10T16:13:35.038Z debug
+.env file not found at "/Users/daniel/Documents/sjlab-app/.env". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-06-10T16:13:35.038Z debug
+.env file not found at "/Users/daniel/Documents/sjlab-app/.env.local". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-06-10T16:13:35.045Z log
+
+ ⛅️ wrangler 4.97.0 (update available 4.99.0)
+─────────────────────────────────────────────
+---
+
+--- 2026-06-10T16:13:35.055Z debug
+Running autoconfig detection in /Users/daniel/Documents/sjlab-app...
+---
+
+--- 2026-06-10T16:13:35.055Z debug
+Metrics dispatcher: Posting data {"deviceId":"4ae14535-55f6-4f56-9314-2c9c0d0c3c93","event":"wrangler command started","timestamp":1781108015055,"properties":{"amplitude_session_id":1781108015049,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"toml","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":true,"agent":null,"argsUsed":[],"argsCombination":"","sanitizedCommand":"deploy","sanitizedArgs":{},"currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T16:13:35.058Z debug
+Metrics dispatcher: Posting data {"deviceId":"4ae14535-55f6-4f56-9314-2c9c0d0c3c93","event":"autoconfig_process_started","timestamp":1781108015058,"properties":{"amplitude_session_id":1781108015055,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"none","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":false,"agent":null,"category":"Workers","os":"darwin:arm64","autoConfigId":"a91a26a1-2c6c-4f6c-acda-6c6a636bfdfa","command":"wrangler deploy","dryRun":false,"currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T16:13:35.059Z debug
+Metrics dispatcher: Posting data {"deviceId":"4ae14535-55f6-4f56-9314-2c9c0d0c3c93","event":"autoconfig_detection_started","timestamp":1781108015059,"properties":{"amplitude_session_id":1781108015055,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"none","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":false,"agent":null,"category":"Workers","os":"darwin:arm64","autoConfigId":"a91a26a1-2c6c-4f6c-acda-6c6a636bfdfa","command":"wrangler deploy","currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T16:13:35.079Z debug
+Metrics dispatcher: Posting data {"deviceId":"4ae14535-55f6-4f56-9314-2c9c0d0c3c93","event":"autoconfig_process_ended","timestamp":1781108015079,"properties":{"amplitude_session_id":1781108015055,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"none","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":false,"agent":null,"category":"Workers","os":"darwin:arm64","autoConfigId":"a91a26a1-2c6c-4f6c-acda-6c6a636bfdfa","command":"wrangler deploy","dryRun":false,"success":true,"currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T16:13:35.115Z log
+Attempting to login via OAuth...
+---
+
+--- 2026-06-10T16:13:35.117Z log
+Opening a link in your default browser: https://dash.cloudflare.com/oauth2/auth?response_type=code&client_id=54d11594-84e4-41aa-b438-e81b8fa78ee7&redirect_uri=http%3A%2F%2Flocalhost%3A8976%2Foauth%2Fcallback&scope=account%3Aread%20user%3Aread%20workers%3Awrite%20workers_kv%3Awrite%20workers_routes%3Awrite%20workers_scripts%3Awrite%20workers_tail%3Aread%20d1%3Awrite%20pages%3Awrite%20zone%3Aread%20ssl_certs%3Awrite%20ai%3Awrite%20ai-search%3Awrite%20ai-search%3Arun%20websearch.run%20agent-memory%3Awrite%20queues%3Awrite%20pipelines%3Awrite%20secrets_store%3Awrite%20artifacts%3Awrite%20flagship%3Awrite%20containers%3Awrite%20cloudchamber%3Awrite%20connectivity%3Aadmin%20email_routing%3Awrite%20email_sending%3Awrite%20browser%3Awrite%20offline_access&state=IFQj1hb9i6Ezt.rbgTuOtinY6ae4.vBL&code_challenge=v6kmY2H6wvo6lk0P-ShGB_LB8doaT2n4axnhHCR2hVY&code_challenge_method=S256
+---
+
+--- 2026-06-10T16:13:46.936Z debug
+fetching auth token grant_type=authorization_code&code=cfoac_7QeObOudE7BVMyAVGq_wF8aGngaONYVP-5CaTJ765X0.h-_eXLgesxQEjG3l_dOGRfouIHEiHNNtqhx6L01z3QA&redirect_uri=http%3A%2F%2Flocalhost%3A8976%2Foauth%2Fcallback&client_id=54d11594-84e4-41aa-b438-e81b8fa78ee7&code_verifier=ZEt1T08xWl84aXQ3Y0Z5dVBTRDRXanp-VWJGVEYzRDFaV2ZEVkZRVWEwNHdQenhhbjN-c1FJcn5fcU53MDJCRC1DWTB0YkI5S0tRb1pycEZ4cXNidDE3NUQta2JoVmdY
+---
+
+--- 2026-06-10T16:13:46.936Z debug
+Checking if domain has Access enabled: dash.cloudflare.com
+---
+
+--- 2026-06-10T16:13:46.936Z debug
+Access switch not cached for: dash.cloudflare.com
+---
+
+--- 2026-06-10T16:13:47.186Z debug
+Caching access switch for: dash.cloudflare.com
+---
+
+--- 2026-06-10T16:13:47.186Z debug
+Fetching auth token from https://dash.cloudflare.com/oauth2/token
+---
+
+--- 2026-06-10T16:13:47.533Z log
+Successfully logged in.
+---
+
+--- 2026-06-10T16:13:47.536Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts
+---
+
+--- 2026-06-10T16:13:47.536Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:47.536Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:47.536Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:47.536Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T16:13:47.537Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/memberships
+---
+
+--- 2026-06-10T16:13:47.537Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:47.537Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:47.537Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:47.537Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T16:13:48.616Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T16:13:48.617Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:48.617Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:48.617Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T16:13:49.544Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T16:13:49.544Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:49.544Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:49.544Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T16:13:49.548Z debug
+Saving to cache: {"account":{"id":"053d6d9140fd678f8d5e1843dffa6298","name":"Vcdanielj@gmail.com's Account"}}
+---
+
+--- 2026-06-10T16:13:49.551Z debug
+Starting verifyWorkerMatchesCITag() with tag: undefined, name: sjlab-app
+---
+
+--- 2026-06-10T16:13:49.551Z debug
+No WRANGLER_CI_MATCH_TAG variable provided, aborting verifyWorkerMatchesCITag()
+---
+
+--- 2026-06-10T16:13:49.557Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/workers/services/sjlab-app
+---
+
+--- 2026-06-10T16:13:49.557Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:49.557Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:49.557Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:49.557Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T16:13:50.847Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T16:13:50.848Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:50.848Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:50.848Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T16:13:50.850Z debug
+Retrieving cached values for account from node_modules/.cache/wrangler
+---
+
+--- 2026-06-10T16:13:50.851Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/workers/scripts/sjlab-app/secrets
+---
+
+--- 2026-06-10T16:13:50.851Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:50.851Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:50.851Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:50.851Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T16:13:52.016Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T16:13:52.016Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:52.016Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:52.016Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T16:13:52.018Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/workers/scripts/sjlab-app/deployments
+---
+
+--- 2026-06-10T16:13:52.018Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:52.018Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:52.018Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:52.018Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T16:13:52.819Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T16:13:52.820Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:52.820Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:52.820Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T16:13:53.668Z info
+🌀 Building list of assets...
+---
+
+--- 2026-06-10T16:13:53.669Z info
+✨ Read 58 files from the assets directory /Users/daniel/Documents/sjlab-app/.open-next/assets
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/BUILD_ID
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/favicon.ico
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/file.svg
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/globe.svg
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/next.svg
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/vercel.svg
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/window.svg
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/EVAkWvXuXIzNY34hl8gaA
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/chunks
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/media
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/media/Geist_Variable-s.p.0tfjw0g40zzvd.woff2
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/media/favicon.0x3dzn~oxb6tn.ico
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/chunks/0.hdslky5b4i0.js
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/chunks/01j1e5dn~e3my.js
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/chunks/01xlw8hd842-c.js
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/chunks/03~yq9q893hmn.js
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/chunks/04ila5.h87ao~.js
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/chunks/05aofh.2gtvqp.js
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/chunks/05ib0~k7k-o33.js
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/chunks/07385iywjanxo.js
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/chunks/07dme~jbsu~24.js
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/chunks/07lhk_q6pmm3r.js
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/chunks/09m7fqb7e.ob..css
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/chunks/0_j4xu_bt7c~k.js
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/chunks/0a41n3x~l~11o.js
+---
+
+--- 2026-06-10T16:13:53.669Z debug
+/_next/static/chunks/0b.3y523kd0jm.css
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0d2khn3~i74jc.css
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0de-gwo8y7oev.css
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0f526b_4~-80l.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0fqf~bob_hcy8.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0frl2_wtqq_ku.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0gowzhtx0yw7p.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0gzlg_qpl1sw..js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0hzuhdv.1kg8s.css
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0jn~ny35a9swu.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0k3omv9igz_rv.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0ka051yepewro.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0n1mi2r_u37e_.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0n4z.7yu76je-.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0pqt~8bl3ukh4.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0swa7eufsuxmj.css
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0tds1r-8-hu8u.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0v9y_163eqz-i.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0vy-k50i86_md.css
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0wmftu07~-x78.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0z_buprzho_jn.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0ze4gu236oq96.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/0~wxxohnd3xxq.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/102p0wr2oi9jm.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/145xn-_lgi~9g.css
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/161ffssftisaq.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/16bxg6pq6rhj8.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/chunks/turbopack-0xrturxf~~y9w.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/EVAkWvXuXIzNY34hl8gaA/_buildManifest.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/EVAkWvXuXIzNY34hl8gaA/_clientMiddlewareManifest.js
+---
+
+--- 2026-06-10T16:13:53.670Z debug
+/_next/static/EVAkWvXuXIzNY34hl8gaA/_ssgManifest.js
+---
+
+--- 2026-06-10T16:13:53.692Z info
+🌀 Starting asset upload...
+---
+
+--- 2026-06-10T16:13:53.693Z debug
+-- START CF API REQUEST: POST https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/workers/scripts/sjlab-app/assets-upload-session
+---
+
+--- 2026-06-10T16:13:53.693Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:53.693Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:53.693Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:53.693Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T16:13:56.048Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T16:13:56.050Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:56.050Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:56.050Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T16:13:56.051Z info
+🌀 Found 4 new or modified static assets to upload. Proceeding with upload...
+---
+
+--- 2026-06-10T16:13:56.055Z info
++ /BUILD_ID
+---
+
+--- 2026-06-10T16:13:56.055Z info
++ /_next/static/chunks/0hzuhdv.1kg8s.css
+---
+
+--- 2026-06-10T16:13:56.055Z info
++ /_next/static/chunks/0f526b_4~-80l.js
+---
+
+--- 2026-06-10T16:13:56.056Z info
++ /_next/static/chunks/07385iywjanxo.js
+---
+
+--- 2026-06-10T16:13:56.067Z debug
+-- START CF API REQUEST: POST https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/workers/assets/upload?base64=true
+---
+
+--- 2026-06-10T16:13:56.067Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:56.067Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:56.067Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:56.071Z debug
+BODY: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:56.071Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T16:13:56.078Z debug
+-- START CF API REQUEST: POST https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/workers/assets/upload?base64=true
+---
+
+--- 2026-06-10T16:13:56.078Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:56.078Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:56.078Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:56.079Z debug
+BODY: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:56.079Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T16:13:56.093Z debug
+-- START CF API REQUEST: POST https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/workers/assets/upload?base64=true
+---
+
+--- 2026-06-10T16:13:56.093Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:56.094Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:56.094Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:56.097Z debug
+BODY: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:56.097Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T16:13:57.001Z debug
+-- START CF API RESPONSE: Accepted 202
+---
+
+--- 2026-06-10T16:13:57.001Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:57.001Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:57.001Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T16:13:57.001Z info
+Uploaded 1 of 4 assets
+---
+
+--- 2026-06-10T16:13:57.001Z debug
+✨ /_next/static/chunks/0f526b_4~-80l.js
+---
+
+--- 2026-06-10T16:13:57.356Z debug
+-- START CF API RESPONSE: Accepted 202
+---
+
+--- 2026-06-10T16:13:57.356Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:57.356Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:57.356Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T16:13:57.357Z info
+Uploaded 2 of 4 assets
+---
+
+--- 2026-06-10T16:13:57.357Z debug
+✨ /_next/static/chunks/07385iywjanxo.js
+---
+
+--- 2026-06-10T16:13:57.910Z debug
+-- START CF API RESPONSE: Created 201
+---
+
+--- 2026-06-10T16:13:57.911Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:57.911Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:57.911Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T16:13:57.911Z info
+Uploaded 4 of 4 assets
+---
+
+--- 2026-06-10T16:13:57.911Z debug
+✨ /BUILD_ID
+---
+
+--- 2026-06-10T16:13:57.911Z debug
+✨ /_next/static/chunks/0hzuhdv.1kg8s.css
+---
+
+--- 2026-06-10T16:13:57.911Z log
+✨ Success! Uploaded 4 files (49 already uploaded) (1.85 sec)
+
+---
+
+--- 2026-06-10T16:13:58.032Z log
+Total Upload: 9375.66 KiB / gzip: 1899.39 KiB
+---
+
+--- 2026-06-10T16:13:58.033Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/workers/scripts/sjlab-app/settings
+---
+
+--- 2026-06-10T16:13:58.033Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:58.033Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:58.033Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:13:58.033Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T16:14:00.494Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T16:14:00.494Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:00.494Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:00.494Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T16:14:00.509Z debug
+-- START CF API REQUEST: POST https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/workers/scripts/sjlab-app/versions
+---
+
+--- 2026-06-10T16:14:00.509Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:00.509Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:00.509Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:00.516Z debug
+BODY: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:00.516Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T16:14:05.043Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T16:14:05.043Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:05.043Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:05.043Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T16:14:05.045Z debug
+-- START CF API REQUEST: POST https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/workers/scripts/sjlab-app/deployments
+---
+
+--- 2026-06-10T16:14:05.045Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:05.045Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:05.045Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:05.045Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T16:14:06.443Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T16:14:06.443Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:06.443Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:06.443Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T16:14:06.444Z debug
+-- START CF API REQUEST: PATCH https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/workers/scripts/sjlab-app/script-settings
+---
+
+--- 2026-06-10T16:14:06.444Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:06.444Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:06.445Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:06.445Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T16:14:06.897Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T16:14:06.897Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:06.897Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:06.897Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T16:14:06.897Z log
+Worker Startup Time: 25 ms
+---
+
+--- 2026-06-10T16:14:06.901Z log
+Your Worker has access to the following bindings:
+---
+
+--- 2026-06-10T16:14:06.901Z log
+Binding                      Resource         
+---
+
+--- 2026-06-10T16:14:06.901Z log
+env.DB (sjlab-prod)          D1 Database      
+---
+
+--- 2026-06-10T16:14:06.901Z log
+env.ASSETS                   Assets           
+---
+
+--- 2026-06-10T16:14:06.901Z log
+
+---
+
+--- 2026-06-10T16:14:06.904Z log
+Uploaded sjlab-app (14.89 sec)
+---
+
+--- 2026-06-10T16:14:06.905Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/workers/subdomain
+---
+
+--- 2026-06-10T16:14:06.905Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:06.905Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:06.905Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:06.905Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T16:14:07.793Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T16:14:07.793Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:07.793Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:07.793Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T16:14:07.794Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/workers/scripts/sjlab-app/subdomain
+---
+
+--- 2026-06-10T16:14:07.794Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:07.794Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:07.794Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:07.794Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T16:14:08.628Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T16:14:08.628Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:08.628Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:08.628Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T16:14:08.629Z debug
+-- START CF API REQUEST: POST https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/workers/scripts/sjlab-app/subdomain
+---
+
+--- 2026-06-10T16:14:08.629Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:08.629Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:08.629Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:08.629Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T16:14:09.520Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T16:14:09.520Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:09.520Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T16:14:09.520Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T16:14:09.520Z log
+Deployed sjlab-app triggers (2.62 sec)
+---
+
+--- 2026-06-10T16:14:09.520Z log
+  https://sjlab-app.vcdanielj.workers.dev
+---
+
+--- 2026-06-10T16:14:09.520Z log
+Current Version ID: b46045c8-e7dc-4547-b86e-a22a534f9e53
+---
+
+--- 2026-06-10T16:14:09.521Z debug
+Metrics dispatcher: Posting data {"deviceId":"4ae14535-55f6-4f56-9314-2c9c0d0c3c93","event":"deploy worker script","timestamp":1781108049521,"properties":{"amplitude_session_id":1781108049521,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"none","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":false,"agent":null,"category":"Workers","os":"darwin:arm64","usesTypeScript":false,"durationMs":19970,"currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T16:14:09.522Z debug
+Metrics dispatcher: Posting data {"deviceId":"4ae14535-55f6-4f56-9314-2c9c0d0c3c93","event":"wrangler command completed","timestamp":1781108049522,"properties":{"amplitude_session_id":1781108015049,"amplitude_event_id":1,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"toml","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":true,"agent":null,"argsUsed":[],"argsCombination":"","sanitizedCommand":"deploy","sanitizedArgs":{},"durationMs":34482,"currentAgentSkillsInstalled":null}}
+---

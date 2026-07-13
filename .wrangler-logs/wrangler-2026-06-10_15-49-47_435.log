@@ -1,0 +1,332 @@
+
+--- 2026-06-10T15:49:47.518Z debug
+🪵  Writing logs to "/Users/daniel/Documents/sjlab-app/.wrangler-logs/wrangler-2026-06-10_15-49-47_435.log"
+---
+
+--- 2026-06-10T15:49:47.518Z debug
+.env file not found at "/Users/daniel/Documents/sjlab-app/.env". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-06-10T15:49:47.518Z debug
+.env file not found at "/Users/daniel/Documents/sjlab-app/.env.local". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-06-10T15:49:47.523Z log
+
+ ⛅️ wrangler 4.97.0 (update available 4.99.0)
+─────────────────────────────────────────────
+---
+
+--- 2026-06-10T15:49:47.535Z log
+Getting User settings...
+---
+
+--- 2026-06-10T15:49:47.536Z debug
+Metrics dispatcher: Posting data {"deviceId":"406b576e-1ec8-4121-a23c-80f2833ef1d9","event":"wrangler command started","timestamp":1781106587536,"properties":{"amplitude_session_id":1781106587528,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"toml","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":true,"agent":null,"argsUsed":[],"argsCombination":"","sanitizedCommand":"whoami","sanitizedArgs":{},"currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T15:49:47.541Z debug
+fetching auth token grant_type=refresh_token&refresh_token=cfort_OEbDgriJg6NmyR50HoCZ8lMTerYGtQAPXUt54mSTmMg.6Ne60yi_pwbML22kSpynYtBAXbhnMsrrfdxP8NdxCiY&client_id=54d11594-84e4-41aa-b438-e81b8fa78ee7
+---
+
+--- 2026-06-10T15:49:47.541Z debug
+Checking if domain has Access enabled: dash.cloudflare.com
+---
+
+--- 2026-06-10T15:49:47.541Z debug
+Access switch not cached for: dash.cloudflare.com
+---
+
+--- 2026-06-10T15:49:47.910Z debug
+Caching access switch for: dash.cloudflare.com
+---
+
+--- 2026-06-10T15:49:47.911Z debug
+Fetching auth token from https://dash.cloudflare.com/oauth2/token
+---
+
+--- 2026-06-10T15:49:48.483Z error
+✘ [ERROR] Failed to fetch auth token: 400 Bad Request
+
+
+---
+
+--- 2026-06-10T15:49:48.486Z debug
+Token refresh failed: [object Object]
+---
+
+--- 2026-06-10T15:49:48.486Z log
+Attempting to login via OAuth...
+---
+
+--- 2026-06-10T15:49:48.488Z log
+Opening a link in your default browser: https://dash.cloudflare.com/oauth2/auth?response_type=code&client_id=54d11594-84e4-41aa-b438-e81b8fa78ee7&redirect_uri=http%3A%2F%2Flocalhost%3A8976%2Foauth%2Fcallback&scope=account%3Aread%20user%3Aread%20workers%3Awrite%20workers_kv%3Awrite%20workers_routes%3Awrite%20workers_scripts%3Awrite%20workers_tail%3Aread%20d1%3Awrite%20pages%3Awrite%20zone%3Aread%20ssl_certs%3Awrite%20ai%3Awrite%20ai-search%3Awrite%20ai-search%3Arun%20websearch.run%20agent-memory%3Awrite%20queues%3Awrite%20pipelines%3Awrite%20secrets_store%3Awrite%20artifacts%3Awrite%20flagship%3Awrite%20containers%3Awrite%20cloudchamber%3Awrite%20connectivity%3Aadmin%20email_routing%3Awrite%20email_sending%3Awrite%20browser%3Awrite%20offline_access&state=7KhkuhAg-kebU59ruQD63zkvgBQHdJ9H&code_challenge=p4-bTobsyQJU-Xta6U-hcs6BEAuDxhPyRJjT3jPiMFA&code_challenge_method=S256
+---
+
+--- 2026-06-10T15:49:58.143Z debug
+fetching auth token grant_type=authorization_code&code=cfoac_tT0hKBc5uAW0uI47S4OMFUkcZQNuxZ5rxs9mK7dLo6U.6eY3LI_3RSZoNnjP0cdL06-77LhNGMbHw4w-F179Gm0&redirect_uri=http%3A%2F%2Flocalhost%3A8976%2Foauth%2Fcallback&client_id=54d11594-84e4-41aa-b438-e81b8fa78ee7&code_verifier=YXJwSkpxbzIwNVlqMUFuaWRlNDhkV0t6RFJsQ341U2VHQ29uNGdWNnZsVjFTSDNsM2VndGhra0lIbGpiWk9UN29nazduYkhCeDg4UWZUNUpYRTkxXzlPNGQ0TjJNUFBO
+---
+
+--- 2026-06-10T15:49:58.143Z debug
+Checking if domain has Access enabled: dash.cloudflare.com
+---
+
+--- 2026-06-10T15:49:58.143Z debug
+Using cached Access switch for: dash.cloudflare.com false
+---
+
+--- 2026-06-10T15:49:58.144Z debug
+Fetching auth token from https://dash.cloudflare.com/oauth2/token
+---
+
+--- 2026-06-10T15:49:58.559Z log
+Successfully logged in.
+---
+
+--- 2026-06-10T15:49:58.562Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/user
+---
+
+--- 2026-06-10T15:49:58.562Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:49:58.562Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:49:58.562Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:49:58.562Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T15:49:59.035Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T15:49:59.035Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:49:59.035Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:49:59.035Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T15:49:59.036Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts
+---
+
+--- 2026-06-10T15:49:59.036Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:49:59.036Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:49:59.036Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:49:59.036Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T15:49:59.037Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/memberships
+---
+
+--- 2026-06-10T15:49:59.037Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:49:59.037Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:49:59.037Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:49:59.037Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T15:49:59.306Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T15:49:59.306Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:49:59.306Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:49:59.306Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T15:49:59.518Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T15:49:59.519Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:49:59.519Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:49:59.519Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T15:49:59.521Z log
+👋 You are logged in with an OAuth Token, associated with the email vcdanielj@gmail.com.
+---
+
+--- 2026-06-10T15:49:59.540Z log
+┌───────────────────────────────┬──────────────────────────────────┐
+│ Account Name                  │ Account ID                       │
+├───────────────────────────────┼──────────────────────────────────┤
+│ Vcdanielj@gmail.com's Account │ 053d6d9140fd678f8d5e1843dffa6298 │
+└───────────────────────────────┴──────────────────────────────────┘
+---
+
+--- 2026-06-10T15:49:59.541Z log
+🔓 Token Permissions:
+---
+
+--- 2026-06-10T15:49:59.541Z log
+Scope (Access)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- account (read)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- user (read)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- workers (write)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- workers_kv (write)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- workers_routes (write)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- workers_scripts (write)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- workers_tail (read)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- d1 (write)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- pages (write)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- zone (read)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- ssl_certs (write)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- ai (write)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- ai-search (write)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- ai-search (run)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- websearch.run 
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- agent-memory (write)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- queues (write)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- pipelines (write)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- secrets_store (write)
+---
+
+--- 2026-06-10T15:49:59.542Z log
+- artifacts (write)
+---
+
+--- 2026-06-10T15:49:59.543Z log
+- flagship (write)
+---
+
+--- 2026-06-10T15:49:59.543Z log
+- containers (write)
+---
+
+--- 2026-06-10T15:49:59.543Z log
+- cloudchamber (write)
+---
+
+--- 2026-06-10T15:49:59.543Z log
+- connectivity (admin)
+---
+
+--- 2026-06-10T15:49:59.543Z log
+- email_routing (write)
+---
+
+--- 2026-06-10T15:49:59.543Z log
+- email_sending (write)
+---
+
+--- 2026-06-10T15:49:59.543Z log
+- browser (write)
+---
+
+--- 2026-06-10T15:49:59.543Z log
+- offline_access 
+---
+
+--- 2026-06-10T15:49:59.547Z debug
+Metrics dispatcher: Posting data {"deviceId":"406b576e-1ec8-4121-a23c-80f2833ef1d9","event":"view accounts","timestamp":1781106599547,"properties":{"amplitude_session_id":1781106599543,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"none","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":false,"agent":null,"category":"Workers","os":"darwin:arm64","currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T15:49:59.550Z debug
+Metrics dispatcher: Posting data {"deviceId":"406b576e-1ec8-4121-a23c-80f2833ef1d9","event":"wrangler command completed","timestamp":1781106599550,"properties":{"amplitude_session_id":1781106587528,"amplitude_event_id":1,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"toml","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":true,"agent":null,"argsUsed":[],"argsCombination":"","sanitizedCommand":"whoami","sanitizedArgs":{},"durationMs":12026,"currentAgentSkillsInstalled":null}}
+---

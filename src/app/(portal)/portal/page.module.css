@@ -1,0 +1,434 @@
+/* ============================================
+   SJ Lab — Portal: Mis Pedidos (Mobile-First)
+   ============================================ */
+
+/* ---------- Header ---------- */
+.header {
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+/* ---------- Financial Summary ---------- */
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.summaryCard {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: slideUp var(--transition-base) ease both;
+  box-shadow: var(--shadow-card);
+}
+
+.summaryCard:nth-child(1) { animation-delay: 0ms; }
+.summaryCard:nth-child(2) { animation-delay: 50ms; }
+.summaryCard:nth-child(3) { animation-delay: 100ms; }
+
+.summaryLabel {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.summaryValue {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.summaryValueGreen {
+  color: var(--color-success);
+}
+
+.summaryValueRed {
+  color: var(--color-danger);
+}
+
+@media (max-width: 640px) {
+  .summaryGrid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .summaryCard {
+    padding: 12px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .summaryValue {
+    font-size: var(--text-lg);
+  }
+}
+
+/* ---------- Filters ---------- */
+.filters {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+
+.filters::-webkit-scrollbar {
+  display: none;
+}
+
+.filterBtn {
+  padding: 8px 16px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-xs);
+}
+
+.filterBtn:hover {
+  border-color: var(--color-border);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}
+
+.filterBtnActive {
+  background: var(--color-text);
+  border-color: var(--color-text);
+  color: #fff;
+}
+
+.filterBtnActive:hover {
+  border-color: var(--color-text);
+  color: #fff;
+}
+
+/* ---------- Order Cards ---------- */
+.orderList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.orderCard {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--transition-base);
+}
+
+.orderCard:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.orderTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.orderInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.orderNumber {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--color-primary);
+  margin-bottom: 4px;
+}
+
+.patientName {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.productName {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  margin-top: 2px;
+}
+
+.statusBadge {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.statusActive {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+.statusCompleted {
+  background: var(--color-success-light);
+  color: var(--color-success-dark);
+}
+
+.statusDelivered {
+  background: #E0E7FF;
+  color: #3730A3;
+}
+
+.statusCancelled {
+  background: var(--color-danger-light);
+  color: var(--color-danger-dark);
+}
+
+/* ---------- Progress Bar ---------- */
+.progressSection {
+  margin-bottom: 12px;
+}
+
+.progressBar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  position: relative;
+}
+
+.progressStep {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.progressDot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  position: relative;
+  z-index: 2;
+  transition: all var(--transition-base);
+}
+
+.progressDotDone {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: white;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.progressDotCurrent {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  box-shadow: 0 0 0 4px var(--color-primary-light);
+}
+
+.progressDotPending {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-light);
+  color: var(--color-text-tertiary);
+}
+
+.progressStepName {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  margin-top: 6px;
+  text-align: center;
+  max-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progressStepNameActive {
+  color: var(--color-primary);
+  font-weight: var(--weight-semibold);
+}
+
+.progressLine {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-border-light);
+  z-index: 0;
+}
+
+.progressLineFilled {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  height: 2px;
+  background: var(--color-success);
+  z-index: 0;
+  transition: width var(--transition-slow);
+}
+
+/* ---------- Order Meta Row ---------- */
+.orderMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.orderDate {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+.orderPrice {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- History Toggle ---------- */
+.historyToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  margin-top: 20px;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-base);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-xs);
+}
+
+.historyToggle:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}
+
+.historyArrow {
+  transition: transform var(--transition-fast);
+  font-size: 12px;
+}
+
+.historyArrowOpen {
+  transform: rotate(180deg);
+}
+
+/* ---------- Loading / Empty ---------- */
+.loadingWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-tertiary);
+  margin-bottom: 16px;
+}
+
+.emptyTitle {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.emptyDesc {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+}
+
+/* ---------- Counter Badge ---------- */
+.counterBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-tertiary);
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-secondary);
+  margin-left: 6px;
+}

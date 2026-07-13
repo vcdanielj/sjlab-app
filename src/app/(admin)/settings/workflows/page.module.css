@@ -1,0 +1,370 @@
+/* ============================================
+   Workflows Settings Page
+   ============================================ */
+
+.title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+  gap: var(--space-4);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ---- Workflow Card ---- */
+.card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: box-shadow var(--transition-base);
+  box-shadow: var(--shadow-card);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card.inactive {
+  opacity: 0.6;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  cursor: pointer;
+  user-select: none;
+}
+
+.cardInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.chevron {
+  transition: transform var(--transition-fast);
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.chevron.open {
+  transform: rotate(90deg);
+}
+
+.cardTitle {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.stepCount {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.iconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-tertiary);
+  transition: all var(--transition-fast);
+  font-size: 12px;
+}
+
+.iconBtn:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text);
+}
+
+/* ---- Steps ---- */
+.stepsContainer {
+  border-top: 1px solid var(--color-border-light);
+  padding: var(--space-4) var(--space-5);
+}
+
+.noSteps {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  text-align: center;
+  padding: var(--space-4);
+}
+
+.stepsList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.stepItem:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.stepItem.stepInactive {
+  opacity: 0.5;
+}
+
+.stepOrder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.moveBtn {
+  font-size: 8px;
+  color: var(--color-text-tertiary);
+  width: 20px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  transition: all var(--transition-fast);
+}
+
+.moveBtn:hover:not(:disabled) {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text);
+}
+
+.moveBtn:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+.orderNum {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-secondary);
+  min-width: 20px;
+  text-align: center;
+}
+
+.stepName {
+  flex: 1;
+  font-size: var(--text-sm);
+  cursor: text;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+}
+
+.stepName:hover {
+  background: var(--color-bg-secondary);
+}
+
+.stepActions {
+  display: flex;
+  gap: var(--space-1);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.stepItem:hover .stepActions {
+  opacity: 1;
+}
+
+/* ---- Inline Edit ---- */
+.editRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.editInput {
+  flex: 1;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.editInput:focus {
+  border-color: var(--color-primary);
+}
+
+.saveBtn {
+  color: var(--color-success);
+  font-size: 14px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+
+.saveBtn:hover {
+  background: var(--color-success-light);
+}
+
+.cancelBtn {
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+
+.cancelBtn:hover {
+  background: var(--color-bg-tertiary);
+}
+
+/* ---- Add Step ---- */
+.addStepRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding: 0 var(--space-3);
+}
+
+.addStepBtn {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-primary);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.addStepBtn:hover {
+  background: var(--color-primary-light);
+}
+
+/* ---- Create Modal ---- */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.stepsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+}
+
+.stepInputRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stepNum {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-secondary);
+  min-width: 20px;
+}
+
+.stepInput {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.stepInput:focus {
+  border-color: var(--color-primary);
+}
+
+.removeStepBtn {
+  color: var(--color-text-tertiary);
+  font-size: 12px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+
+.removeStepBtn:hover {
+  color: var(--color-danger);
+  background: var(--color-danger-light);
+}
+
+.addMoreBtn {
+  font-size: var(--text-sm);
+  color: var(--color-primary);
+  padding: var(--space-2) 0;
+  align-self: flex-start;
+}
+
+.addMoreBtn:hover {
+  text-decoration: underline;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .cardHeader {
+    padding: var(--space-3);
+  }
+
+  .stepsContainer {
+    padding: var(--space-3);
+  }
+}

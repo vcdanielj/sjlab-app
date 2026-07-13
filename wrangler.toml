@@ -1,0 +1,29 @@
+#:schema node_modules/wrangler/config-schema.json
+
+name = "sjlab-app"
+compatibility_date = "2025-04-01"
+compatibility_flags = ["nodejs_compat"]
+main = "worker-entry.js"
+
+[triggers]
+crons = ["0 8 * * *"] # Diario a las 8:00 AM (para evaluar frecuencia dinámica en tiempo de ejecución)
+
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+invocation_logs = true
+
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+
+# Cloudflare D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "sjlab-prod"
+database_id = "b52d9e42-1967-4884-91e3-4dac2b4c62ef"
+migrations_dir = "src/db/migrations"

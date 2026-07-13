@@ -1,0 +1,337 @@
+
+--- 2026-06-10T15:50:06.743Z debug
+🪵  Writing logs to "/Users/daniel/Documents/sjlab-app/.wrangler-logs/wrangler-2026-06-10_15-50-06_648.log"
+---
+
+--- 2026-06-10T15:50:06.743Z debug
+.env file not found at "/Users/daniel/Documents/sjlab-app/.env". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-06-10T15:50:06.743Z debug
+.env file not found at "/Users/daniel/Documents/sjlab-app/.env.local". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-06-10T15:50:06.747Z log
+
+ ⛅️ wrangler 4.97.0 (update available 4.99.0)
+─────────────────────────────────────────────
+---
+
+--- 2026-06-10T15:50:06.748Z log
+Resource location: remote 
+
+---
+
+--- 2026-06-10T15:50:06.758Z debug
+Metrics dispatcher: Posting data {"deviceId":"406b576e-1ec8-4121-a23c-80f2833ef1d9","event":"wrangler command started","timestamp":1781106606758,"properties":{"amplitude_session_id":1781106606751,"amplitude_event_id":0,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"toml","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":true,"agent":null,"argsUsed":["remote"],"argsCombination":"remote","sanitizedCommand":"d1 migrations apply","sanitizedArgs":{"remote":true},"currentAgentSkillsInstalled":null}}
+---
+
+--- 2026-06-10T15:50:06.781Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts
+---
+
+--- 2026-06-10T15:50:06.781Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:06.781Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:06.781Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:06.781Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T15:50:06.782Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/memberships
+---
+
+--- 2026-06-10T15:50:06.782Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:06.782Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:06.782Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:06.782Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T15:50:07.239Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T15:50:07.240Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:07.240Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:07.240Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T15:50:07.821Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T15:50:07.821Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:07.821Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:07.821Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T15:50:07.823Z debug
+Saving to cache: {"account":{"id":"053d6d9140fd678f8d5e1843dffa6298","name":"Vcdanielj@gmail.com's Account"}}
+---
+
+--- 2026-06-10T15:50:07.824Z log
+🌀 Executing on remote database sjlab-prod (b52d9e42-1967-4884-91e3-4dac2b4c62ef):
+---
+
+--- 2026-06-10T15:50:07.824Z log
+🌀 To execute on your local development database, remove the --remote flag from your wrangler command.
+---
+
+--- 2026-06-10T15:50:07.825Z debug
+-- START CF API REQUEST: POST https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/d1/database/b52d9e42-1967-4884-91e3-4dac2b4c62ef/query
+---
+
+--- 2026-06-10T15:50:07.825Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:07.825Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:07.825Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:07.825Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T15:50:08.457Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T15:50:08.458Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:08.458Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:08.458Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T15:50:08.460Z log
+🚣 Executed 1 command in 0.33ms
+---
+
+--- 2026-06-10T15:50:08.462Z debug
+Retrieving cached values for account from node_modules/.cache/wrangler
+---
+
+--- 2026-06-10T15:50:08.463Z log
+🌀 Executing on remote database sjlab-prod (b52d9e42-1967-4884-91e3-4dac2b4c62ef):
+---
+
+--- 2026-06-10T15:50:08.463Z log
+🌀 To execute on your local development database, remove the --remote flag from your wrangler command.
+---
+
+--- 2026-06-10T15:50:08.464Z debug
+-- START CF API REQUEST: POST https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/d1/database/b52d9e42-1967-4884-91e3-4dac2b4c62ef/query
+---
+
+--- 2026-06-10T15:50:08.464Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:08.464Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:08.464Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:08.464Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T15:50:08.685Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T15:50:08.685Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:08.685Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:08.685Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T15:50:08.686Z log
+🚣 Executed 1 command in 0.66ms
+---
+
+--- 2026-06-10T15:50:08.686Z log
+Migrations to be applied:
+---
+
+--- 2026-06-10T15:50:08.690Z log
+┌────────────────────────────────┐
+│ name                           │
+├────────────────────────────────┤
+│ 0004_order_color.sql           │
+├────────────────────────────────┤
+│ 0005_order_prosthesis_jobs.sql │
+└────────────────────────────────┘
+---
+
+--- 2026-06-10T15:50:24.022Z log
+🌀 Executing on remote database sjlab-prod (b52d9e42-1967-4884-91e3-4dac2b4c62ef):
+---
+
+--- 2026-06-10T15:50:24.024Z log
+🌀 To execute on your local development database, remove the --remote flag from your wrangler command.
+---
+
+--- 2026-06-10T15:50:24.029Z debug
+-- START CF API REQUEST: POST https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/d1/database/b52d9e42-1967-4884-91e3-4dac2b4c62ef/query
+---
+
+--- 2026-06-10T15:50:24.029Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:24.029Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:24.029Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:24.030Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T15:50:24.520Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T15:50:24.520Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:24.520Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:24.520Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T15:50:24.521Z log
+🚣 Executed 2 commands in 1.77ms
+---
+
+--- 2026-06-10T15:50:24.522Z log
+┌────────────────────────────────┬────────┐
+│ name                           │ status │
+├────────────────────────────────┼────────┤
+│ 0004_order_color.sql           │ ✅     │
+├────────────────────────────────┼────────┤
+│ 0005_order_prosthesis_jobs.sql │ 🕒️    │
+└────────────────────────────────┴────────┘
+---
+
+--- 2026-06-10T15:50:24.523Z log
+🌀 Executing on remote database sjlab-prod (b52d9e42-1967-4884-91e3-4dac2b4c62ef):
+---
+
+--- 2026-06-10T15:50:24.523Z log
+🌀 To execute on your local development database, remove the --remote flag from your wrangler command.
+---
+
+--- 2026-06-10T15:50:24.523Z debug
+-- START CF API REQUEST: POST https://api.cloudflare.com/client/v4/accounts/053d6d9140fd678f8d5e1843dffa6298/d1/database/b52d9e42-1967-4884-91e3-4dac2b4c62ef/query
+---
+
+--- 2026-06-10T15:50:24.523Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:24.523Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:24.523Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:24.523Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-06-10T15:50:24.838Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-06-10T15:50:24.838Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:24.838Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-06-10T15:50:24.838Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-06-10T15:50:24.838Z log
+🚣 Executed 2 commands in 0.82ms
+---
+
+--- 2026-06-10T15:50:24.838Z log
+┌────────────────────────────────┬────────┐
+│ name                           │ status │
+├────────────────────────────────┼────────┤
+│ 0004_order_color.sql           │ ✅     │
+├────────────────────────────────┼────────┤
+│ 0005_order_prosthesis_jobs.sql │ ✅     │
+└────────────────────────────────┴────────┘
+---
+
+--- 2026-06-10T15:50:24.839Z debug
+Metrics dispatcher: Posting data {"deviceId":"406b576e-1ec8-4121-a23c-80f2833ef1d9","event":"wrangler command completed","timestamp":1781106624839,"properties":{"amplitude_session_id":1781106606751,"amplitude_event_id":1,"wranglerVersion":"4.97.0","wranglerMajorVersion":4,"wranglerMinorVersion":97,"wranglerPatchVersion":0,"osPlatform":"Mac OS","osVersion":"Darwin Kernel Version 24.6.0: Wed Nov  5 21:30:44 PST 2025; root:xnu-11417.140.69.705.2~1/RELEASE_ARM64_T6041","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"toml","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":true,"hasAssets":true,"agent":null,"argsUsed":["remote"],"argsCombination":"remote","sanitizedCommand":"d1 migrations apply","sanitizedArgs":{"remote":true},"durationMs":18095,"currentAgentSkillsInstalled":null}}
+---
