@@ -13,24 +13,52 @@ interface BimonetaryCalculatorProps {
   onClose: () => void;
 }
 
-const safeEval = (expr: string): number => {
+export const safeEval = (expr: string): number => {
+  let sanitized = expr;
+
   // Replace visual math symbols
-  let sanitized = expr
+  sanitized = sanitized
     .replace(/×/g, '*')
     .replace(/÷/g, '/')
     .replace(/=/g, '');
 
-  // Strip anything that is not math-related
+  // Strip anything that is not math-related (allow numbers, operators, parenthesis, dots, spaces)
   sanitized = sanitized.replace(/[^0-9+\-*/().]/g, '');
 
-  if (!sanitized.trim()) return 0;
-
-  try {
-    const fn = new Function(`return (${sanitized})`);
+  const balanceAndEval = (str: string): number => {
+    let openCount = 0;
+    for (const char of str) {
+      if (char === '(') openCount++;
+      if (char === ')') openCount--;
+    }
+    let balanced = str;
+    if (openCount > 0) {
+      balanced = balanced + ')'.repeat(openCount);
+    } else if (openCount < 0) {
+      balanced = '('.repeat(Math.abs(openCount)) + balanced;
+    }
+    
+    if (!balanced.trim()) return 0;
+    
+    const fn = new Function(`return (${balanced})`);
     const val = fn();
     return typeof val === 'number' && !isNaN(val) ? val : 0;
+  };
+
+  try {
+    return balanceAndEval(sanitized);
   } catch {
-    return 0;
+    // Attempt recovery by stripping trailing operators/parentheses and balancing
+    let clean = sanitized.trim();
+    while (clean && /[\+\-\*/\(]$/.test(clean)) {
+      clean = clean.slice(0, -1).trim();
+      try {
+        return balanceAndEval(clean);
+      } catch {
+        // continue stripping
+      }
+    }
+    throw new Error('Invalid expression');
   }
 };
 
@@ -94,32 +122,92 @@ export function BimonetaryCalculator({ isOpen, onClose }: BimonetaryCalculatorPr
   // Handle calculator digits
   const handleDigit = useCallback((digit: string) => {
     if (resetOnNext) {
-      setDisplay(digit);
+      if (digit === '.') {
+        setDisplay('0.');
+      } else {
+        setDisplay(digit);
+      }
       setFormula('');
       setResetOnNext(false);
     } else {
-      if (digit === '.' && display.includes('.')) return;
-      setDisplay((prev) => (prev === '0' && digit !== '.' ? digit : prev + digit));
+      if (digit === '.') {
+        // Avoid double decimals in the active number
+        const match = display.match(/[0-9.]*$/);
+        const lastNumber = match ? match[0] : '';
+        if (lastNumber.includes('.')) return;
+
+        // If the expression ends with something that's not a digit (or is empty), append 0.
+        if (!display || display === '0' || /[\+\-\*\/ \(\)]$/.test(display)) {
+          setDisplay((prev) => (prev === '0' ? '0.' : prev + '0.'));
+        } else {
+          setDisplay((prev) => prev + '.');
+        }
+      } else {
+        setDisplay((prev) => (prev === '0' ? digit : prev + digit));
+      }
     }
   }, [display, resetOnNext]);
 
   // Handle operations
   const handleOperator = useCallback((op: string) => {
     const visualOp = op === '*' ? '×' : op === '/' ? '÷' : op;
+    const formattedOp = ` ${visualOp} `;
+
     if (resetOnNext) {
-      setFormula(display + ' ' + visualOp + ' ');
-      setDisplay('0');
+      if (display === 'Error') {
+        setDisplay('0' + formattedOp);
+      } else {
+        setDisplay(display + formattedOp);
+      }
+      setFormula('');
       setResetOnNext(false);
     } else {
-      // If formula ends in space, replace operator
-      if (formula.endsWith(' + ') || formula.endsWith(' - ') || formula.endsWith(' × ') || formula.endsWith(' ÷ ')) {
-        setFormula((prev) => prev.slice(0, -3) + ' ' + visualOp + ' ');
+      // Check if expression ends with an operator (e.g. " + ", " - ", " × ", " ÷ ")
+      const endsWithOpMatch = display.match(/ [+\-×÷] $/);
+      if (endsWithOpMatch) {
+        setDisplay((prev) => prev.slice(0, -3) + formattedOp);
       } else {
-        setFormula((prev) => prev + display + ' ' + visualOp + ' ');
-        setDisplay('0');
+        if (display === '0' && op === '-') {
+          setDisplay('-');
+        } else {
+          setDisplay((prev) => prev + formattedOp);
+        }
       }
     }
-  }, [display, formula, resetOnNext]);
+  }, [display, resetOnNext]);
+
+  // Handle parenthesis insertion
+  const handleParenthesis = useCallback((paren: '(' | ')') => {
+    if (resetOnNext) {
+      if (paren === '(') {
+        setDisplay('(');
+        setFormula('');
+        setResetOnNext(false);
+      }
+      return;
+    }
+
+    if (paren === '(') {
+      if (display === '0') {
+        setDisplay('(');
+      } else {
+        const lastChar = display.slice(-1);
+        // If last character is a digit or closing parenthesis, insert implicit multiplication
+        if (/[0-9\)]/.test(lastChar)) {
+          setDisplay((prev) => prev + ' × (');
+        } else {
+          setDisplay((prev) => prev + '(');
+        }
+      }
+    } else {
+      // Only allow closing parenthesis if we have open parenthesis
+      const openCount = (display.match(/\(/g) || []).length;
+      const closeCount = (display.match(/\)/g) || []).length;
+      if (openCount > closeCount) {
+        setDisplay((prev) => prev + ')');
+      }
+    }
+  }, [display, resetOnNext]);
 
   const handleClear = useCallback(() => {
     setDisplay('0');
@@ -133,34 +221,41 @@ export function BimonetaryCalculator({ isOpen, onClose }: BimonetaryCalculatorPr
       return;
     }
     setDisplay((prev) => {
-      if (prev.length <= 1) return '0';
-      return prev.slice(0, -1);
+      if (prev.endsWith(' ')) {
+        const sliced = prev.slice(0, -3);
+        return sliced || '0';
+      }
+      const sliced = prev.slice(0, -1);
+      return sliced || '0';
     });
   }, [resetOnNext, handleClear]);
 
   const handleEquals = useCallback(() => {
     if (resetOnNext) return;
-    const fullExpression = formula + display;
-    if (!fullExpression.trim()) return;
+    if (display === '0' || !display.trim()) return;
 
-    const evalResult = safeEval(fullExpression);
-    // Format to prevent precision bugs (e.g. 0.1 + 0.2)
-    const formatted = Number(evalResult.toFixed(6)).toString();
-
-    setDisplay(formatted);
-    setFormula(fullExpression + ' =');
-    setResetOnNext(true);
-  }, [display, formula, resetOnNext]);
+    try {
+      const evalResult = safeEval(display);
+      const formatted = Number(evalResult.toFixed(6)).toString();
+      setFormula(display + ' =');
+      setDisplay(formatted);
+      setResetOnNext(true);
+    } catch {
+      setFormula(display + ' =');
+      setDisplay('Error');
+      setResetOnNext(true);
+    }
+  }, [display, resetOnNext]);
 
   const handleConvert = useCallback((rate: number, label: string, operator: 'multiply' | 'divide') => {
     if (!rate) return;
-    let baseVal = parseFloat(display);
-    if (isNaN(baseVal)) return;
-
-    // If formula is active and we haven't evaluated it yet, evaluate first
-    if (!resetOnNext && formula) {
-      const fullExpression = formula + display;
-      baseVal = safeEval(fullExpression);
+    let baseVal = 0;
+    
+    try {
+      baseVal = resetOnNext ? parseFloat(display) : safeEval(display);
+      if (isNaN(baseVal)) baseVal = 0;
+    } catch {
+      baseVal = 0;
     }
 
     let finalVal = 0;
@@ -177,17 +272,28 @@ export function BimonetaryCalculator({ isOpen, onClose }: BimonetaryCalculatorPr
     setDisplay(Number(finalVal.toFixed(4)).toString());
     setFormula(newFormula);
     setResetOnNext(true);
-  }, [display, formula, resetOnNext]);
+  }, [display, resetOnNext]);
 
   const handleInsertRate = useCallback((rate: number) => {
     if (!rate) return;
     const rateStr = rate.toString();
     if (resetOnNext) {
+      setDisplay(rateStr);
       setFormula('');
       setResetOnNext(false);
+    } else {
+      if (display === '0') {
+        setDisplay(rateStr);
+      } else {
+        const lastChar = display.slice(-1);
+        if (/[0-9\)]/.test(lastChar)) {
+          setDisplay((prev) => prev + ' × ' + rateStr);
+        } else {
+          setDisplay((prev) => prev + rateStr);
+        }
+      }
     }
-    setDisplay(rateStr);
-  }, [resetOnNext]);
+  }, [display, resetOnNext]);
 
   // Keyboard events inside drawer
   useEffect(() => {
@@ -213,6 +319,9 @@ export function BimonetaryCalculator({ isOpen, onClose }: BimonetaryCalculatorPr
       } else if (['+', '-', '*', '/'].includes(key)) {
         e.preventDefault();
         handleOperator(key);
+      } else if (key === '(' || key === ')') {
+        e.preventDefault();
+        handleParenthesis(key as '(' | ')');
       } else if (key === 'Enter' || key === '=') {
         e.preventDefault();
         handleEquals();
@@ -230,7 +339,7 @@ export function BimonetaryCalculator({ isOpen, onClose }: BimonetaryCalculatorPr
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, handleDigit, handleOperator, handleEquals, handleBackspace, handleClear, onClose]);
+  }, [isOpen, handleDigit, handleOperator, handleEquals, handleBackspace, handleClear, handleParenthesis, onClose]);
 
   // Click outside drawer to close
   const handleOverlayClick = (e: React.MouseEvent) => {
@@ -382,27 +491,29 @@ export function BimonetaryCalculator({ isOpen, onClose }: BimonetaryCalculatorPr
         {/* Pad Keypad */}
         <div className={styles.keypad}>
           <button className={`${styles.key} ${styles.keyClear}`} onClick={handleClear}>C</button>
+          <button className={`${styles.key} ${styles.keyOperator}`} onClick={() => handleParenthesis('(')}>(</button>
+          <button className={`${styles.key} ${styles.keyOperator}`} onClick={() => handleParenthesis(')')}>)</button>
           <button className={`${styles.key} ${styles.keyOperator}`} onClick={handleBackspace}>⌫</button>
-          <button className={`${styles.key} ${styles.keyOperator}`} onClick={() => handleOperator('/')}>÷</button>
-          <button className={`${styles.key} ${styles.keyOperator}`} onClick={() => handleOperator('*')}>×</button>
 
           <button className={styles.key} onClick={() => handleDigit('7')}>7</button>
           <button className={styles.key} onClick={() => handleDigit('8')}>8</button>
           <button className={styles.key} onClick={() => handleDigit('9')}>9</button>
-          <button className={`${styles.key} ${styles.keyOperator}`} onClick={() => handleOperator('-')}>-</button>
+          <button className={`${styles.key} ${styles.keyOperator}`} onClick={() => handleOperator('/')}>÷</button>
 
           <button className={styles.key} onClick={() => handleDigit('4')}>4</button>
           <button className={styles.key} onClick={() => handleDigit('5')}>5</button>
           <button className={styles.key} onClick={() => handleDigit('6')}>6</button>
-          <button className={`${styles.key} ${styles.keyOperator}`} onClick={() => handleOperator('+')}>+</button>
+          <button className={`${styles.key} ${styles.keyOperator}`} onClick={() => handleOperator('*')}>×</button>
 
           <button className={styles.key} onClick={() => handleDigit('1')}>1</button>
           <button className={styles.key} onClick={() => handleDigit('2')}>2</button>
           <button className={styles.key} onClick={() => handleDigit('3')}>3</button>
-          <button className={`${styles.key} ${styles.keyEquals}`} onClick={handleEquals}>=</button>
+          <button className={`${styles.key} ${styles.keyOperator}`} onClick={() => handleOperator('-')}>-</button>
 
-          <button className={styles.key} style={{ gridColumn: 'span 2' }} onClick={() => handleDigit('0')}>0</button>
+          <button className={styles.key} onClick={() => handleDigit('0')}>0</button>
           <button className={styles.key} onClick={() => handleDigit('.')}>.</button>
+          <button className={`${styles.key} ${styles.keyOperator}`} onClick={() => handleOperator('+')}>+</button>
+          <button className={`${styles.key} ${styles.keyEquals}`} onClick={handleEquals}>=</button>
         </div>
 
         {/* Shortcuts indicator */}

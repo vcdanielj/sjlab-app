@@ -3,12 +3,13 @@
 // ============================================
 
 
-import { eq, desc, asc, sql } from 'drizzle-orm';
+import { eq, desc, asc, sql, and } from 'drizzle-orm';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { getDb } from '@/db';
 import * as schema from '@/db/schema';
 import { getSession } from '@/lib/session';
 import { buildOrderProgressSummary } from '@/lib/order-prosthesis';
+import { isValidOrderColor } from '@/lib/order-colors';
 
 // GET /api/orders/[id] — Order detail with step history and notes
 export async function GET(
@@ -226,5 +227,98 @@ export async function DELETE(
     return Response.json({ data: { id, deleted: true } });
   } catch {
     return Response.json({ error: 'Error al eliminar pedido' }, { status: 500 });
+  }
+}
+
+// PATCH /api/orders/[id] — Update basic fields of an order
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getSession();
+    if (!session || session.role !== 'admin') {
+      return Response.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const body = await request.json();
+    const { clientId, patientName, color, finalPriceUsd } = body as {
+      clientId?: string;
+      patientName?: string;
+      color?: string | null;
+      finalPriceUsd?: number;
+    };
+
+    const { env } = await getCloudflareContext({ async: true });
+    const db = getDb(env.DB);
+
+    // Verify order exists
+    const order = await db.query.orders.findFirst({
+      where: eq(schema.orders.id, id),
+    });
+    if (!order) {
+      return Response.json({ error: 'Pedido no encontrado' }, { status: 404 });
+    }
+
+    const updateData: Partial<typeof schema.orders.$inferInsert> = {};
+
+    if (clientId !== undefined) {
+      const client = await db.query.users.findFirst({
+        where: eq(schema.users.id, clientId),
+      });
+      if (!client) {
+        return Response.json({ error: 'El cliente no existe' }, { status: 404 });
+      }
+      updateData.clientId = clientId;
+    }
+
+    if (patientName !== undefined) {
+      if (!patientName.trim()) {
+        return Response.json({ error: 'El nombre del paciente no puede estar vacío' }, { status: 400 });
+      }
+      updateData.patientName = patientName.trim();
+    }
+
+    if (color !== undefined) {
+      if (color !== null && color !== '' && !isValidOrderColor(color)) {
+        return Response.json({ error: 'El color seleccionado no es válido' }, { status: 400 });
+      }
+      updateData.color = color || null;
+    }
+
+    if (finalPriceUsd !== undefined) {
+      if (typeof finalPriceUsd !== 'number' || finalPriceUsd < 0) {
+        return Response.json({ error: 'El precio debe ser un número positivo' }, { status: 400 });
+      }
+      updateData.finalPriceUsd = finalPriceUsd;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return Response.json({ error: 'No hay campos para actualizar' }, { status: 400 });
+    }
+
+    // Perform database updates
+    await db.transaction(async (tx) => {
+      await tx.update(schema.orders).set(updateData).where(eq(schema.orders.id, id));
+
+      // If patientName was updated, update all jobs in this order that aren't patient exceptions
+      if (patientName !== undefined) {
+        await tx
+          .update(schema.orderProsthesisJobs)
+          .set({ patientName: patientName.trim() })
+          .where(
+            and(
+              eq(schema.orderProsthesisJobs.orderId, id),
+              eq(schema.orderProsthesisJobs.isPatientException, false)
+            )
+          );
+      }
+    });
+
+    return Response.json({ data: { id, updated: true } });
+  } catch (err) {
+    console.error('Error updating order:', err);
+    return Response.json({ error: 'Error al actualizar pedido' }, { status: 500 });
   }
 }

@@ -12,7 +12,9 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/Toast';
 import { PaymentModal } from '@/components/finances/PaymentModal';
 import { formatCurrency, formatRelativeTime } from '@/lib/utils';
-import { getOrderColorOption, ORDER_COLOR_STANDARDS } from '@/lib/order-colors';
+import { getOrderColorOption, ORDER_COLOR_STANDARDS, ORDER_COLOR_OPTIONS, OrderColorStandard } from '@/lib/order-colors';
+import { Input } from '@/components/ui/Input';
+import { ClientCombobox } from '@/components/ui/ClientCombobox';
 import styles from './page.module.css';
 
 // ---------- Types ----------
@@ -102,6 +104,12 @@ interface OrderDetail {
   stepHistory: StepHistoryItem[];
   notes: NoteItem[];
   workflowSteps: WorkflowStep[];
+}
+
+interface Client {
+  id: string;
+  name: string;
+  clinicName: string | null;
 }
 
 interface Meta {
@@ -207,6 +215,19 @@ export default function OrdersPage() {
 
   // Payment Modal
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  // Edit basic fields state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editClientId, setEditClientId] = useState('');
+  const [editPatientName, setEditPatientName] = useState('');
+  const [editColor, setEditColor] = useState('');
+  const [editPrice, setEditPrice] = useState('');
+  const [savingBasicFields, setSavingBasicFields] = useState(false);
+  const [clients, setClients] = useState<Client[]>([]);
+
+  // Color modal state
+  const [colorModalOpen, setColorModalOpen] = useState(false);
+  const [activeColorStandard, setActiveColorStandard] = useState<OrderColorStandard>('vita-classical');
 
   // ---- Data Fetching ----
 
@@ -435,6 +456,19 @@ export default function OrdersPage() {
 
   // ---- Drawer ----
 
+  useEffect(() => {
+    async function loadClients() {
+      try {
+        const res = await fetch('/api/clients?limit=200&status=active');
+        const data = await res.json();
+        if (data.data) setClients(data.data);
+      } catch {
+        console.error('Error al cargar clientes');
+      }
+    }
+    loadClients();
+  }, []);
+
   async function openDrawer(orderId: string) {
     try {
       const res = await fetch(`/api/orders/${orderId}`);
@@ -442,9 +476,56 @@ export default function OrdersPage() {
       if (data.data) {
         setDrawerOrder(data.data);
         setDrawerOpen(true);
+        setIsEditing(false); // Reset edit state when opening/refreshing drawer
       }
     } catch {
       addToast('Error al cargar detalle', 'error');
+    }
+  }
+
+  async function handleSaveBasicFields(e: React.FormEvent) {
+    e.preventDefault();
+    if (!drawerOrder) return;
+    
+    if (!editClientId || !editPrice) {
+      addToast('Cliente y precio son requeridos', 'warning');
+      return;
+    }
+
+    const finalPrice = parseFloat(editPrice);
+    if (isNaN(finalPrice) || finalPrice < 0) {
+      addToast('El precio debe ser un número válido', 'warning');
+      return;
+    }
+
+    setSavingBasicFields(true);
+    try {
+      const res = await fetch(`/api/orders/${drawerOrder.order.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: editClientId,
+          patientName: editPatientName.trim(),
+          color: editColor || null,
+          finalPriceUsd: finalPrice,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        addToast(data.error || 'Error al actualizar pedido', 'error');
+        return;
+      }
+
+      addToast('Pedido actualizado', 'success');
+      setIsEditing(false);
+      
+      // Reload details and list
+      await openDrawer(drawerOrder.order.id);
+      fetchOrders(meta.page, activeTab, searchText);
+    } catch {
+      addToast('Error al actualizar pedido', 'error');
+    } finally {
+      setSavingBasicFields(false);
     }
   }
 
@@ -817,55 +898,149 @@ export default function OrdersPage() {
             <div className={styles.drawerContent}>
               {/* Order Info */}
               <div className={styles.drawerSection}>
-                <h3 className={styles.sectionTitle}>Información</h3>
-                <div className={styles.infoGrid}>
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Paciente</span>
-                    <span className={styles.infoValue}>{drawerOrder.order.patientName}</span>
-                  </div>
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Odontólogo</span>
-                    <span className={styles.infoValue}>{drawerOrder.order.clientName}</span>
-                  </div>
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Trabajos</span>
-                    <span className={styles.infoValue}>{drawerOrder.progress.completed}/{drawerOrder.progress.total} listos</span>
-                  </div>
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Color</span>
-                    <span className={styles.infoValue}>
-                      {selectedOrderColor
-                        ? `${selectedOrderColor.code} · ${selectedOrderColor.name} (${ORDER_COLOR_STANDARDS.find((standard) => standard.value === selectedOrderColor.standard)?.label})`
-                        : 'Sin color'}
-                    </span>
-                  </div>
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Precio</span>
-                    <span className={styles.infoValue}>{formatCurrency(drawerOrder.order.finalPriceUsd)}</span>
-                  </div>
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Pagado</span>
-                    <span className={styles.infoValue}>{formatCurrency(drawerOrder.order.amountPaidUsd)}</span>
-                  </div>
-                  <div className={styles.infoItem}>
-                    <span className={styles.infoLabel}>Saldo</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span className={`${styles.infoValue} ${balanceClass(drawerOrder.order.finalPriceUsd - drawerOrder.order.amountPaidUsd)}`}>
-                        {formatCurrency(drawerOrder.order.finalPriceUsd - drawerOrder.order.amountPaidUsd)}
-                      </span>
-                      {drawerOrder.order.status !== 'cancelled' && drawerOrder.order.finalPriceUsd - drawerOrder.order.amountPaidUsd > 0.005 && (
-                        <button
-                          type="button"
-                          className={styles.quickPayLink}
-                          onClick={() => setIsPaymentModalOpen(true)}
-                          title="Abonar a este pedido"
-                        >
-                          💵 Abonar
-                        </button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <h3 className={styles.sectionTitle} style={{ marginBottom: 0 }}>Información</h3>
+                  {drawerOrder.order.status !== 'cancelled' && (
+                    <button
+                      type="button"
+                      className={styles.editBtn}
+                      onClick={() => {
+                        if (isEditing) {
+                          setIsEditing(false);
+                        } else {
+                          setEditClientId(drawerOrder.order.clientId);
+                          setEditPatientName(drawerOrder.order.patientName);
+                          setEditColor(drawerOrder.order.color || '');
+                          setEditPrice(String(drawerOrder.order.finalPriceUsd));
+                          setIsEditing(true);
+                        }
+                      }}
+                    >
+                      {isEditing ? 'Cancelar' : '✏️ Editar'}
+                    </button>
+                  )}
+                </div>
+
+                {isEditing ? (
+                  <form onSubmit={handleSaveBasicFields} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                      <Input
+                        label="Paciente"
+                        value={editPatientName}
+                        onChange={(e) => setEditPatientName(e.target.value)}
+                        required
+                      />
+                      <Input
+                        label="Precio Final (USD)"
+                        type="number"
+                        value={editPrice}
+                        onChange={(e) => setEditPrice(e.target.value)}
+                        min="0"
+                        step="0.01"
+                        required
+                      />
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+                      <ClientCombobox
+                        clients={clients}
+                        value={editClientId}
+                        onChange={setEditClientId}
+                        onClientCreated={(c) => setClients((prev) => [...prev, c])}
+                      />
+                    </div>
+                    
+                    <div className={styles.colorField}>
+                      <label className={styles.label} style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--weight-medium)', color: 'var(--color-text)' }}>Color (opcional)</label>
+                      <button
+                        type="button"
+                        className={styles.colorSelector}
+                        onClick={() => setColorModalOpen(true)}
+                      >
+                        <span className={styles.colorSelectorMain}>
+                          <span
+                            className={styles.colorSwatch}
+                            style={{ backgroundColor: getOrderColorOption(editColor)?.hex || '#F3F4F6' }}
+                          />
+                          <span className={styles.colorSelectorText}>
+                            {getOrderColorOption(editColor)
+                              ? `${getOrderColorOption(editColor)?.code} · ${getOrderColorOption(editColor)?.name}`
+                              : 'Seleccionar color'}
+                          </span>
+                        </span>
+                        <span className={styles.colorSelectorStandard}>
+                          {getOrderColorOption(editColor)
+                            ? ORDER_COLOR_STANDARDS.find((standard) => standard.value === getOrderColorOption(editColor)?.standard)?.label
+                            : 'Vita Classical'}
+                        </span>
+                      </button>
+                      {editColor && (
+                        <div className={styles.colorActions}>
+                          <button
+                            type="button"
+                            className={styles.clearColorBtn}
+                            onClick={() => setEditColor('')}
+                          >
+                            Quitar color
+                          </button>
+                        </div>
                       )}
                     </div>
+
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                      <Button type="submit" loading={savingBasicFields}>Guardar</Button>
+                      <Button variant="secondary" onClick={() => setIsEditing(false)}>Cancelar</Button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className={styles.infoGrid}>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Paciente</span>
+                      <span className={styles.infoValue}>{drawerOrder.order.patientName}</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Odontólogo</span>
+                      <span className={styles.infoValue}>{drawerOrder.order.clientName}</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Trabajos</span>
+                      <span className={styles.infoValue}>{drawerOrder.progress.completed}/{drawerOrder.progress.total} listos</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Color</span>
+                      <span className={styles.infoValue}>
+                        {selectedOrderColor
+                          ? `${selectedOrderColor.code} · ${selectedOrderColor.name} (${ORDER_COLOR_STANDARDS.find((standard) => standard.value === selectedOrderColor.standard)?.label})`
+                          : 'Sin color'}
+                      </span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Precio</span>
+                      <span className={styles.infoValue}>{formatCurrency(drawerOrder.order.finalPriceUsd)}</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Pagado</span>
+                      <span className={styles.infoValue}>{formatCurrency(drawerOrder.order.amountPaidUsd)}</span>
+                    </div>
+                    <div className={styles.infoItem}>
+                      <span className={styles.infoLabel}>Saldo</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span className={`${styles.infoValue} ${balanceClass(drawerOrder.order.finalPriceUsd - drawerOrder.order.amountPaidUsd)}`}>
+                          {formatCurrency(drawerOrder.order.finalPriceUsd - drawerOrder.order.amountPaidUsd)}
+                        </span>
+                        {drawerOrder.order.status !== 'cancelled' && drawerOrder.order.finalPriceUsd - drawerOrder.order.amountPaidUsd > 0.005 && (
+                          <button
+                            type="button"
+                            className={styles.quickPayLink}
+                            onClick={() => setIsPaymentModalOpen(true)}
+                            title="Abonar a este pedido"
+                          >
+                            💵 Abonar
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 <div style={{ marginTop: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                   {drawerOrder.order.status !== 'cancelled' && drawerOrder.order.finalPriceUsd - drawerOrder.order.amountPaidUsd > 0.005 && (
@@ -1148,6 +1323,82 @@ export default function OrdersPage() {
           targetOrderNumber={drawerOrder.order.orderNumber}
           targetOrderRemainingUsd={drawerOrder.order.finalPriceUsd - drawerOrder.order.amountPaidUsd}
         />
+      )}
+
+      {colorModalOpen && (
+        <div className={styles.modalOverlay} onClick={() => setColorModalOpen(false)}>
+          <div
+            className={styles.modalCard}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="color-modal-title"
+          >
+            <div className={styles.modalHeader}>
+              <div>
+                <h2 id="color-modal-title" className={styles.modalTitle}>Seleccionar Color</h2>
+                <p className={styles.modalSubtitle}>Elige un estándar y luego el código con su nombre.</p>
+              </div>
+              <button
+                type="button"
+                className={styles.modalClose}
+                onClick={() => setColorModalOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className={styles.standardTabs}>
+              {ORDER_COLOR_STANDARDS.map((standard) => (
+                <button
+                  key={standard.value}
+                  type="button"
+                  className={`${styles.standardTab} ${activeColorStandard === standard.value ? styles.standardTabActive : ''}`}
+                  onClick={() => setActiveColorStandard(standard.value)}
+                >
+                  {standard.label}
+                </button>
+              ))}
+            </div>
+
+            <div className={styles.colorGrid}>
+              {ORDER_COLOR_OPTIONS.filter((option) => option.standard === activeColorStandard).map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`${styles.colorOption} ${editColor === option.value ? styles.colorOptionActive : ''}`}
+                  onClick={() => {
+                    setEditColor(option.value);
+                    setColorModalOpen(false);
+                  }}
+                >
+                  <span className={styles.colorOptionTop}>
+                    <span className={styles.colorSwatchLarge} style={{ backgroundColor: option.hex }} />
+                    <span className={styles.colorHex}>{option.hex}</span>
+                  </span>
+                  <span className={styles.colorCode}>{option.code}</span>
+                  <span className={styles.colorName}>{option.name}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className={styles.modalActions}>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setEditColor('');
+                  setColorModalOpen(false);
+                }}
+              >
+                Sin color
+              </Button>
+              <Button type="button" variant="secondary" onClick={() => setColorModalOpen(false)}>
+                Cerrar
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

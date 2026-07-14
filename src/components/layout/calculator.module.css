@@ -308,7 +308,6 @@
 }
 
 .keyEquals {
-  grid-column: span 2;
   background: var(--color-primary);
   color: var(--color-bg-card);
   font-weight: var(--weight-bold);
