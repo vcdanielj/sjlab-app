@@ -78,6 +78,10 @@ export default function PortalOrdersPage() {
   const [filter, setFilter] = useState('all');
   const [historyOpen, setHistoryOpen] = useState(false);
 
+  // Split active vs history
+  const activeOrders = orders.filter((o) => o.status === 'active');
+  const historyOrders = orders.filter((o) => o.status !== 'active');
+
   const fetchOrders = useCallback(async (status: string) => {
     setLoading(true);
     try {
@@ -96,9 +100,29 @@ export default function PortalOrdersPage() {
     fetchOrders(filter);
   }, [filter, fetchOrders]);
 
-  // Split active vs history
-  const activeOrders = orders.filter((o) => o.status === 'active');
-  const historyOrders = orders.filter((o) => o.status !== 'active');
+  // Scroll to highlighted order
+  useEffect(() => {
+    if (!loading && orders.length > 0) {
+      const params = new URLSearchParams(window.location.search);
+      const orderId = params.get('orderId');
+      if (orderId) {
+        // If the order is in history and history is closed, open it!
+        const isInHistory = historyOrders.some((o) => o.id === orderId);
+        if (isInHistory && !historyOpen) {
+          setHistoryOpen(true);
+        }
+
+        // Wait for render cycle to complete before scrolling
+        const timer = setTimeout(() => {
+          const el = document.getElementById(`order-card-${orderId}`);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 150);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [loading, orders, historyOpen, historyOrders]);
 
   function renderProgressBar(progress: OrderProgress, status: string) {
     if (progress.totalSteps === 0) return null;
@@ -155,8 +179,13 @@ export default function PortalOrdersPage() {
     const statusCls = STATUS_STYLES[order.status] || '';
     const statusLabel = STATUS_LABELS[order.status] || order.status;
 
+    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const highlightedId = searchParams ? searchParams.get('orderId') : null;
+    const isHighlighted = order.id === highlightedId;
+    const cardCls = `${styles.orderCard} ${isHighlighted ? styles.orderCardHighlighted : ''}`;
+
     return (
-      <div key={order.id} className={styles.orderCard}>
+      <div key={order.id} id={`order-card-${order.id}`} className={cardCls}>
         <div className={styles.orderTop}>
           <div className={styles.orderInfo}>
             <div className={styles.orderNumber}>Pedido #{order.orderNumber}</div>

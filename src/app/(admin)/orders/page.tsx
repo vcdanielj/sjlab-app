@@ -47,6 +47,7 @@ interface Order {
   currentStepId: string;
   clientName: string;
   clientClinic: string | null;
+  clientPhone: string | null;
   productName: string;
   productSummary?: string;
   categorySummary?: string;
@@ -215,6 +216,8 @@ export default function OrdersPage() {
 
   // Payment Modal
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [payingOrder, setPayingOrder] = useState<any>(null);
 
   // Edit basic fields state
   const [isEditing, setIsEditing] = useState(false);
@@ -1051,6 +1054,9 @@ export default function OrdersPage() {
                   <Button variant="secondary" onClick={() => window.open(`/api/pdf/order/${drawerOrder.order.id}`, '_blank')}>
                     Imprimir Recibo
                   </Button>
+                  <Button variant="secondary" onClick={() => setIsShareModalOpen(true)}>
+                    🔗 Compartir
+                  </Button>
                   <Button variant="secondary" onClick={() => router.push(`/orders/${drawerOrder.order.id}/delivery`)}>
                     🛵 Solicitar Delivery
                   </Button>
@@ -1323,6 +1329,121 @@ export default function OrdersPage() {
           targetOrderNumber={drawerOrder.order.orderNumber}
           targetOrderRemainingUsd={drawerOrder.order.finalPriceUsd - drawerOrder.order.amountPaidUsd}
         />
+      )}
+
+      {isShareModalOpen && drawerOrder && (
+        <div className={styles.modalOverlay} onClick={() => setIsShareModalOpen(false)}>
+          <div
+            className={styles.modalCard}
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: '500px', width: '90%' }}
+          >
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Compartir Detalle de Pedido</h3>
+              <button className={styles.closeBtn} onClick={() => setIsShareModalOpen(false)}>×</button>
+            </div>
+            <div className={styles.modalBody} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem 0' }}>
+              <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+                Se enviará el siguiente mensaje preformateado al odontólogo:
+              </p>
+              
+              <textarea
+                readOnly
+                value={(() => {
+                  const balance = drawerOrder.order.finalPriceUsd - drawerOrder.order.amountPaidUsd;
+                  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+                  const prodName = drawerOrder.order.productName || 'Prótesis';
+                  const statusLabel = {
+                    active: `En proceso (${drawerOrder.workflowSteps.find(s => s.id === drawerOrder.order.currentStepId)?.name || 'Producción'})`,
+                    completed: 'Completado',
+                    delivered: 'Entregado',
+                    cancelled: 'Cancelado',
+                  }[drawerOrder.order.status] || drawerOrder.order.status;
+
+                  return `¡Hola, Dr/Dra. ${drawerOrder.order.clientName}! 👋\n\nLe compartimos el estado de su pedido en *SJ Lab*:\n\n📦 *Pedido:* #${drawerOrder.order.orderNumber}\n👤 *Paciente:* ${drawerOrder.order.patientName}\n🦷 *Trabajo:* ${prodName}\n📊 *Estatus:* ${statusLabel}\n💵 *Saldo de este pedido:* ${formatCurrency(balance)} USD\n\nPuede ver el seguimiento en tiempo real de su trabajo aquí:\n${origin}/portal?orderId=${drawerOrder.order.id}\n\n¡Gracias por su confianza!`;
+                })()}
+                rows={10}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--color-border)',
+                  fontFamily: 'monospace',
+                  fontSize: '0.85rem',
+                  resize: 'none',
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  color: 'var(--color-text)',
+                }}
+              />
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: '0.5rem' }}>
+                <Button
+                  style={{ flex: 1 }}
+                  onClick={async () => {
+                    const balance = drawerOrder.order.finalPriceUsd - drawerOrder.order.amountPaidUsd;
+                    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+                    const prodName = drawerOrder.order.productName || 'Prótesis';
+                    const statusLabel = {
+                      active: `En proceso (${drawerOrder.workflowSteps.find(s => s.id === drawerOrder.order.currentStepId)?.name || 'Producción'})`,
+                      completed: 'Completado',
+                      delivered: 'Entregado',
+                      cancelled: 'Cancelado',
+                    }[drawerOrder.order.status] || drawerOrder.order.status;
+
+                    const msg = `¡Hola, Dr/Dra. ${drawerOrder.order.clientName}! 👋\n\nLe compartimos el estado de su pedido en *SJ Lab*:\n\n📦 *Pedido:* #${drawerOrder.order.orderNumber}\n👤 *Paciente:* ${drawerOrder.order.patientName}\n🦷 *Trabajo:* ${prodName}\n📊 *Estatus:* ${statusLabel}\n💵 *Saldo de este pedido:* ${formatCurrency(balance)} USD\n\nPuede ver el seguimiento en tiempo real de su trabajo aquí:\n${origin}/portal?orderId=${drawerOrder.order.id}\n\n¡Gracias por su confianza!`;
+                    
+                    try {
+                      await navigator.clipboard.writeText(msg);
+                      addToast('Mensaje copiado al portapapeles', 'success');
+                    } catch {
+                      addToast('No se pudo copiar', 'warning');
+                    }
+                  }}
+                >
+                  📋 Copiar Mensaje
+                </Button>
+                
+                <Button
+                  variant="primary"
+                  style={{ flex: 1, backgroundColor: '#25D366', borderColor: '#25D366', color: '#FFF' }}
+                  onClick={() => {
+                    const balance = drawerOrder.order.finalPriceUsd - drawerOrder.order.amountPaidUsd;
+                    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+                    const prodName = drawerOrder.order.productName || 'Prótesis';
+                    const statusLabel = {
+                      active: `En proceso (${drawerOrder.workflowSteps.find(s => s.id === drawerOrder.order.currentStepId)?.name || 'Producción'})`,
+                      completed: 'Completado',
+                      delivered: 'Entregado',
+                      cancelled: 'Cancelado',
+                    }[drawerOrder.order.status] || drawerOrder.order.status;
+
+                    const msg = `¡Hola, Dr/Dra. ${drawerOrder.order.clientName}! 👋\n\nLe compartimos el estado de su pedido en *SJ Lab*:\n\n📦 *Pedido:* #${drawerOrder.order.orderNumber}\n👤 *Paciente:* ${drawerOrder.order.patientName}\n🦷 *Trabajo:* ${prodName}\n📊 *Estatus:* ${statusLabel}\n💵 *Saldo de este pedido:* ${formatCurrency(balance)} USD\n\nPuede ver el seguimiento en tiempo real de su trabajo aquí:\n${origin}/portal?orderId=${drawerOrder.order.id}\n\n¡Gracias por su confianza!`;
+                    
+                    const phone = drawerOrder.order.clientPhone;
+                    let cleanPhone = phone ? phone.replace(/[^\d]/g, '') : '';
+                    if (cleanPhone) {
+                      if (cleanPhone.startsWith('0') && cleanPhone.length === 11) {
+                        cleanPhone = '58' + cleanPhone.substring(1);
+                      } else if ((cleanPhone.startsWith('412') || cleanPhone.startsWith('414') || cleanPhone.startsWith('416') || cleanPhone.startsWith('424') || cleanPhone.startsWith('426')) && cleanPhone.length === 10) {
+                        cleanPhone = '58' + cleanPhone;
+                      }
+                    }
+                    const whatsappUrl = cleanPhone 
+                      ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`
+                      : `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+                    
+                    window.open(whatsappUrl, '_blank');
+                  }}
+                >
+                  💬 Enviar WhatsApp
+                </Button>
+              </div>
+            </div>
+            <div className={styles.modalFooter} style={{ padding: '1rem 0 0 0', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'flex-end' }}>
+              <Button variant="secondary" onClick={() => setIsShareModalOpen(false)}>Cerrar</Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {colorModalOpen && (

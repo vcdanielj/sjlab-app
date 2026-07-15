@@ -6,7 +6,7 @@ export { ORDER_STATUS, PAYMENT_STATUS, CURRENCY, PAYMENT_METHOD, USER_ROLE } fro
 
 // Payment methods available per currency
 export const PAYMENT_METHODS_BY_CURRENCY = {
-  USD: ['Efectivo', 'Zelle', 'Transferencia'],
+  USD: ['Efectivo', 'Zelle', 'Binance', 'Transferencia'],
   VES: ['Transferencia', 'Pago Móvil'],
 } as const;
 

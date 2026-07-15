@@ -182,6 +182,7 @@ export const expenses = sqliteTable('expenses', {
   
   expenseDate: integer('expense_date').notNull(),
   notes: text('notes'),
+  paymentMethod: text('payment_method'), // Cuenta/Método de pago (Zelle, Binance, Efectivo, etc.)
   isPersonal: integer('is_personal', { mode: 'boolean' }).notNull().default(false),
   isRecurring: integer('is_recurring', { mode: 'boolean' }).notNull().default(false),
   recurrenceInterval: text('recurrence_interval'),
@@ -228,6 +229,23 @@ export const systemSettings = sqliteTable('system_settings', {
   key: text('key').primaryKey(),
   value: text('value').notNull(),
   updatedAt: integer('updated_at').notNull(),
+});
+
+// ---------- Cash Closings (Arqueo de Caja) ----------
+export const cashClosings = sqliteTable('cash_closings', {
+  id: text('id').primaryKey(),
+  closingDate: integer('closing_date').notNull(),
+  closedBy: text('closed_by').notNull().references(() => users.id, { onDelete: 'restrict' }),
+  zelleExpected: real('zelle_expected').notNull(),
+  zelleActual: real('zelle_actual').notNull(),
+  binanceExpected: real('binance_expected').notNull(),
+  binanceActual: real('binance_actual').notNull(),
+  efectivoExpected: real('efectivo_expected').notNull(),
+  efectivoActual: real('efectivo_actual').notNull(),
+  bolivaresExpected: real('bolivares_expected').notNull(),
+  bolivaresActual: real('bolivares_actual').notNull(),
+  notes: text('notes'),
+  createdAt: integer('created_at').notNull(),
 });
 
 
@@ -384,6 +402,13 @@ export const deliveryPaymentsRelations = relations(deliveryPayments, ({ one }) =
   }),
   creator: one(users, {
     fields: [deliveryPayments.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const cashClosingsRelations = relations(cashClosings, ({ one }) => ({
+  user: one(users, {
+    fields: [cashClosings.closedBy],
     references: [users.id],
   }),
 }));

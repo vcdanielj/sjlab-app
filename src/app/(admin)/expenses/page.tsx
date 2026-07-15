@@ -12,6 +12,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/Toast';
 import { formatCurrency, formatDate, getPeriodRange } from '@/lib/utils';
 import { fetchRatesWithCache } from '@/lib/rates-client';
+import { PAYMENT_METHODS_BY_CURRENCY } from '@/lib/constants';
 import styles from './page.module.css';
 
 // ---------- Types ----------
@@ -35,6 +36,7 @@ interface Expense {
   amountUsd: number;
   expenseDate: number;
   notes: string | null;
+  paymentMethod: string | null;
   isRecurring: boolean;
   recurrenceInterval: string | null;
   recurrenceTemplateId: string | null;
@@ -148,6 +150,7 @@ export default function ExpensesPage() {
   const [formDesc, setFormDesc] = useState('');
   const [formCategoryId, setFormCategoryId] = useState('');
   const [formCurrency, setFormCurrency] = useState('USD');
+  const [formPaymentMethod, setFormPaymentMethod] = useState('');
   const [formAmountOriginal, setFormAmountOriginal] = useState('');
   const [formExchangeRate, setFormExchangeRate] = useState('');
   const [formAmountUsd, setFormAmountUsd] = useState('');
@@ -377,6 +380,7 @@ export default function ExpensesPage() {
     setFormDesc('');
     setFormCategoryId(categories[0]?.id || '');
     setFormCurrency('USD');
+    setFormPaymentMethod('');
     setFormAmountOriginal('');
     setFormExchangeRate('');
     setFormAmountUsd('');
@@ -411,6 +415,7 @@ export default function ExpensesPage() {
     setFormDesc(exp.description);
     setFormCategoryId(exp.categoryId || '');
     setFormCurrency(exp.currency || 'USD');
+    setFormPaymentMethod(exp.paymentMethod || '');
     setFormAmountOriginal(exp.amountOriginal ? String(exp.amountOriginal) : '');
     setFormAppliedExchangeRateType((exp as any).appliedExchangeRateType || 'USD_PARALLEL');
     setFormExchangeRate(exp.exchangeRate ? String(exp.exchangeRate) : '');
@@ -428,6 +433,7 @@ export default function ExpensesPage() {
     setFormDesc(t.description);
     setFormCategoryId(t.categoryId || '');
     setFormCurrency(t.currency || 'USD');
+    setFormPaymentMethod(t.paymentMethod || '');
     setFormAmountOriginal(t.amountOriginal ? String(t.amountOriginal) : '');
     setFormAppliedExchangeRateType((t as any).appliedExchangeRateType || 'USD_PARALLEL');
     setFormExchangeRate(t.exchangeRate ? String(t.exchangeRate) : '');
@@ -449,6 +455,10 @@ export default function ExpensesPage() {
       addToast('Debes clasificar el gasto como personal o del laboratorio', 'warning');
       return;
     }
+    if (!formPaymentMethod) {
+      addToast('Debes seleccionar un método de pago', 'warning');
+      return;
+    }
 
     setSaving(true);
     try {
@@ -457,6 +467,7 @@ export default function ExpensesPage() {
         category: 'otro',
         categoryId: formCategoryId || null,
         currency: formCurrency,
+        paymentMethod: formPaymentMethod || null,
         amountOriginal: parseFloat(formAmountOriginal) || parseFloat(formAmountUsd) || null,
         appliedExchangeRateType: formCurrency === 'VES' ? formAppliedExchangeRateType : null,
         exchangeRate: formCurrency === 'VES' ? parseFloat(formExchangeRate) : null,
@@ -701,9 +712,10 @@ export default function ExpensesPage() {
                 <th onClick={() => handleSort('categoryId')} className={styles.sortableHeader}>
                   Categoría <SortIcon active={sortBy === 'categoryId'} order={sortOrder} />
                 </th>
-                <th onClick={() => handleSort('isPersonal')} className={styles.sortableHeader}>
+                 <th onClick={() => handleSort('isPersonal')} className={styles.sortableHeader}>
                   Clasificación <SortIcon active={sortBy === 'isPersonal'} order={sortOrder} />
                 </th>
+                <th>Cuenta</th>
                 <th onClick={() => handleSort('currency')} className={styles.sortableHeader}>
                   Moneda <SortIcon active={sortBy === 'currency'} order={sortOrder} />
                 </th>
@@ -732,6 +744,20 @@ export default function ExpensesPage() {
                   <td>
                     <span className={`${styles.scopeBadge} ${exp.isPersonal ? styles.scopeBadgePersonal : styles.scopeBadgeLab}`}>
                       {exp.isPersonal ? 'Personal' : 'Laboratorio'}
+                    </span>
+                  </td>
+                  <td>
+                    <span style={{
+                      fontSize: '0.75rem',
+                      padding: '2px 6px',
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'var(--color-bg-secondary)',
+                      border: '1px solid var(--color-border)',
+                      fontWeight: 'var(--weight-medium)',
+                      color: 'var(--color-text-secondary)',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {exp.paymentMethod || '—'}
                     </span>
                   </td>
                   <td>
@@ -845,6 +871,20 @@ export default function ExpensesPage() {
                 <Input label="Fecha *" type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} required />
               </div>
 
+              <div className={styles.modalRow}>
+                <Select
+                  label="Cuenta / Método de Pago *"
+                  value={formPaymentMethod}
+                  onChange={(e) => setFormPaymentMethod(e.target.value)}
+                  required
+                >
+                  <option value="">Seleccionar cuenta...</option>
+                  {(PAYMENT_METHODS_BY_CURRENCY[formCurrency as 'USD' | 'VES'] || []).map((m) => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </Select>
+              </div>
+
               <div className={styles.currencySection}>
                 <label className={styles.fieldLabel}>Clasificación *</label>
                 <div className={styles.currencyTabs}>
@@ -869,10 +909,24 @@ export default function ExpensesPage() {
               <div className={styles.currencySection}>
                 <label className={styles.fieldLabel}>Moneda</label>
                 <div className={styles.currencyTabs}>
-                  <button type="button" className={`${styles.currencyTab} ${formCurrency === 'USD' ? styles.currencyTabActive : ''}`} onClick={() => setFormCurrency('USD')}>
+                  <button
+                    type="button"
+                    className={`${styles.currencyTab} ${formCurrency === 'USD' ? styles.currencyTabActive : ''}`}
+                    onClick={() => {
+                      setFormCurrency('USD');
+                      setFormPaymentMethod('');
+                    }}
+                  >
                     USD ($)
                   </button>
-                  <button type="button" className={`${styles.currencyTab} ${formCurrency === 'VES' ? styles.currencyTabActive : ''}`} onClick={() => setFormCurrency('VES')}>
+                  <button
+                    type="button"
+                    className={`${styles.currencyTab} ${formCurrency === 'VES' ? styles.currencyTabActive : ''}`}
+                    onClick={() => {
+                      setFormCurrency('VES');
+                      setFormPaymentMethod('');
+                    }}
+                  >
                     VES (Bs)
                   </button>
                 </div>

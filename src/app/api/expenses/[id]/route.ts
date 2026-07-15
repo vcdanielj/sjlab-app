@@ -29,6 +29,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     const currency = body.currency !== undefined ? body.currency : existing.currency;
+    const paymentMethod = body.paymentMethod !== undefined ? body.paymentMethod : existing.paymentMethod;
     const amountOriginal = body.amountOriginal !== undefined 
       ? (body.amountOriginal ? parseFloat(body.amountOriginal) : null) 
       : existing.amountOriginal;
@@ -39,6 +40,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const exchangeRate = body.exchangeRate !== undefined 
       ? (body.exchangeRate ? parseFloat(body.exchangeRate) : null) 
       : existing.exchangeRate;
+
+    if (paymentMethod !== undefined && !paymentMethod?.trim()) {
+      return Response.json({ error: 'El método de pago / cuenta es obligatorio' }, { status: 400 });
+    }
 
     const orgAmount = amountOriginal || body.amountUsd || existing.amountOriginal || existing.amountUsd;
 
@@ -73,6 +78,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       category: body.category || existing.category,
       categoryId: body.categoryId !== undefined ? (body.categoryId || null) : existing.categoryId,
       currency,
+      paymentMethod: paymentMethod ? paymentMethod.trim() : null,
       amountOriginal: orgAmount,
       appliedExchangeRateType: rateType,
       exchangeRate: appliedRate,

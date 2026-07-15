@@ -27,6 +27,7 @@ export type Currency = typeof CURRENCY[keyof typeof CURRENCY];
 export const PAYMENT_METHOD = {
   CASH: 'Efectivo',
   ZELLE: 'Zelle',
+  BINANCE: 'Binance',
   TRANSFER: 'Transferencia',
   MOBILE: 'Pago Móvil',
 } as const;
@@ -187,4 +188,23 @@ export interface ClientSummary {
   totalPaid: number;
   balance: number;
   lastPaymentDate: number | null;
+}
+
+// ---------- Cash Closing Types ----------
+
+export interface CashClosing {
+  id: string;
+  closingDate: number;
+  closedBy: string;
+  closedByName?: string;
+  zelleExpected: number;
+  zelleActual: number;
+  binanceExpected: number;
+  binanceActual: number;
+  efectivoExpected: number;
+  efectivoActual: number;
+  bolivaresExpected: number;
+  bolivaresActual: number;
+  notes: string | null;
+  createdAt: number;
 }

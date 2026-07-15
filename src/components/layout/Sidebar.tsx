@@ -64,6 +64,18 @@ const NAV_ITEMS = [
     ),
   },
   {
+    label: 'Caja / Cierre',
+    href: '/caja',
+    roles: ['admin'],
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <rect x="2" y="3" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M6 7h8M6 10h8M6 13h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <circle cx="14" cy="13" r="1.5" fill="currentColor" />
+      </svg>
+    ),
+  },
+  {
     label: 'Delivery',
     href: '/delivery',
     roles: ['admin', 'tech', 'delivery'],

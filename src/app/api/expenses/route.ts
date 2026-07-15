@@ -144,7 +144,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       description, category, categoryId,
-      currency, amountOriginal, appliedExchangeRateType, exchangeRate,
+      currency, paymentMethod, amountOriginal, appliedExchangeRateType, exchangeRate,
       expenseDate, notes, isPersonal,
       isRecurring, recurrenceInterval, recurrenceTemplateId,
     } = body;
@@ -155,6 +155,9 @@ export async function POST(request: Request) {
     }
     if (typeof isPersonal !== 'boolean') {
       return Response.json({ error: 'La clasificación del gasto es obligatoria' }, { status: 400 });
+    }
+    if (!paymentMethod?.trim()) {
+      return Response.json({ error: 'El método de pago / cuenta es obligatorio' }, { status: 400 });
     }
 
     const orgAmount = amountOriginal ? parseFloat(amountOriginal) : parseFloat(body.amountUsd);
@@ -186,7 +189,7 @@ export async function POST(request: Request) {
     }
 
     const id = crypto.randomUUID();
-    const now = Math.floor(Date.now() / 1000);
+    const timestampNow = Math.floor(Date.now() / 1000);
 
     await db.insert(schema.expenses).values({
       id,
@@ -194,6 +197,7 @@ export async function POST(request: Request) {
       category: category || 'otro',
       categoryId: categoryId || null,
       currency: currency || 'USD',
+      paymentMethod: paymentMethod.trim(),
       amountOriginal: orgAmount,
       appliedExchangeRateType: rateType,
       exchangeRate: appliedRate,
@@ -207,7 +211,7 @@ export async function POST(request: Request) {
       recurrenceInterval: isRecurring ? (recurrenceInterval || 'monthly') : null,
       recurrenceTemplateId: recurrenceTemplateId || null,
       createdBy: session.id,
-      createdAt: now,
+      createdAt: timestampNow,
     });
 
     return Response.json({ data: { id } }, { status: 201 });

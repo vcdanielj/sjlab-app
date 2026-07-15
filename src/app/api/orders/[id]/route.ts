@@ -44,6 +44,7 @@ export async function GET(
         clientId: schema.orders.clientId,
         clientName: schema.users.name,
         clientClinic: schema.users.clinicName,
+        clientPhone: schema.users.phone,
         productId: schema.orders.productId,
         productName: schema.products.name,
         workflowId: schema.products.workflowId,

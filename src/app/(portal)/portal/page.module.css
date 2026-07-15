@@ -432,3 +432,24 @@
   color: var(--color-text-secondary);
   margin-left: 6px;
 }
+
+/* ---------- Highlighted Card Style ---------- */
+.orderCardHighlighted {
+  border: 2px solid var(--color-primary) !important;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.25) !important;
+  animation: pulseBorder 2s infinite ease-in-out;
+  scroll-margin-top: 100px;
+}
+
+@keyframes pulseBorder {
+  0% {
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.45);
+    border-color: #2563EB;
+  }
+  100% {
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+  }
+}
