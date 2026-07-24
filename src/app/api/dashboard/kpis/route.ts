@@ -216,6 +216,56 @@ export async function GET(request: Request) {
       .from(schema.orders)
       .where(and(eq(schema.orders.status, 'active')));
 
+    // Recurring expenses calculation (monthly prorated)
+    const recurringExpenses = await db
+      .select({
+        amountRealUsd: schema.expenses.amountRealUsd,
+        amountUsd: schema.expenses.amountUsd,
+        recurrenceInterval: schema.expenses.recurrenceInterval,
+        recurrenceTemplateId: schema.expenses.recurrenceTemplateId,
+      })
+      .from(schema.expenses)
+      .where(eq(schema.expenses.isRecurring, true));
+
+    let totalMonthlyRecurring = 0;
+    const seenTemplateIds = new Set<string>();
+
+    for (const exp of recurringExpenses) {
+      if (exp.recurrenceTemplateId && seenTemplateIds.has(exp.recurrenceTemplateId)) {
+        continue;
+      }
+      if (exp.recurrenceTemplateId) {
+        seenTemplateIds.add(exp.recurrenceTemplateId);
+      }
+
+      const amt = exp.amountRealUsd || exp.amountUsd || 0;
+      const interval = (exp.recurrenceInterval || 'monthly').toLowerCase();
+
+      if (interval === 'weekly') {
+        totalMonthlyRecurring += amt * (52 / 12);
+      } else if (interval === 'biweekly') {
+        totalMonthlyRecurring += amt * 2;
+      } else if (interval === 'monthly') {
+        totalMonthlyRecurring += amt;
+      } else if (interval === 'quarterly') {
+        totalMonthlyRecurring += amt / 3;
+      } else if (interval === 'yearly') {
+        totalMonthlyRecurring += amt / 12;
+      } else {
+        totalMonthlyRecurring += amt;
+      }
+    }
+
+    const pendingCollection = Math.max(0, currentInvoiced.total - currentCollected.total);
+    const prevPendingCollection = Math.max(0, prevInvoiced.total - prevCollected.total);
+
+    const expenseRatio = currentInvoiced.total > 0
+      ? Math.round((currentExpenses.total / currentInvoiced.total) * 100)
+      : 0;
+    const prevExpenseRatio = prevInvoiced.total > 0
+      ? Math.round((prevExpenses.total / prevInvoiced.total) * 100)
+      : 0;
+
     return Response.json({
       data: {
         totalInvoiced: {
@@ -269,6 +319,22 @@ export async function GET(request: Request) {
         activeOrders: {
           value: activeOrders.total,
           previous: 0,
+        },
+        monthlyRecurringExpense: {
+          value: totalMonthlyRecurring,
+          previous: 0,
+        },
+        pendingCollection: {
+          value: pendingCollection,
+          previous: prevPendingCollection,
+        },
+        expenseRatio: {
+          value: expenseRatio,
+          previous: prevExpenseRatio,
+        },
+        avgDailyExpense: {
+          value: Math.round(currentExpenses.total / Math.max(1, Math.round((to - from) / 86400))),
+          previous: Math.round(prevExpenses.total / Math.max(1, Math.round((prevTo - prevFrom) / 86400))),
         },
       },
     });

@@ -238,7 +238,7 @@ export async function PATCH(
 ) {
   try {
     const session = await getSession();
-    if (!session || session.role !== 'admin') {
+    if (!session || (session.role !== 'admin' && session.role !== 'tech')) {
       return Response.json({ error: 'No autorizado' }, { status: 401 });
     }
 
@@ -299,13 +299,30 @@ export async function PATCH(
       return Response.json({ error: 'No hay campos para actualizar' }, { status: 400 });
     }
 
-    // Perform database updates
-    await db.transaction(async (tx) => {
-      await tx.update(schema.orders).set(updateData).where(eq(schema.orders.id, id));
+    // Perform database updates — try transaction first, fallback to sequential for Cloudflare D1
+    try {
+      await db.transaction(async (tx) => {
+        await tx.update(schema.orders).set(updateData).where(eq(schema.orders.id, id));
 
-      // If patientName was updated, update all jobs in this order that aren't patient exceptions
+        // If patientName was updated, update all jobs in this order that aren't patient exceptions
+        if (patientName !== undefined) {
+          await tx
+            .update(schema.orderProsthesisJobs)
+            .set({ patientName: patientName.trim() })
+            .where(
+              and(
+                eq(schema.orderProsthesisJobs.orderId, id),
+                eq(schema.orderProsthesisJobs.isPatientException, false)
+              )
+            );
+        }
+      });
+    } catch (txError) {
+      console.error('Update order transaction failed, falling back to sequential:', txError);
+      await db.update(schema.orders).set(updateData).where(eq(schema.orders.id, id));
+
       if (patientName !== undefined) {
-        await tx
+        await db
           .update(schema.orderProsthesisJobs)
           .set({ patientName: patientName.trim() })
           .where(
@@ -315,7 +332,7 @@ export async function PATCH(
             )
           );
       }
-    });
+    }
 
     return Response.json({ data: { id, updated: true } });
   } catch (err) {

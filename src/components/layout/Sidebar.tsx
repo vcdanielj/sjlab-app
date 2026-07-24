@@ -64,8 +64,8 @@ const NAV_ITEMS = [
     ),
   },
   {
-    label: 'Caja / Cierre',
-    href: '/caja',
+    label: 'Tesorería',
+    href: '/tesoreria',
     roles: ['admin'],
     icon: (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

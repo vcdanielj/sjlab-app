@@ -89,8 +89,8 @@
 .pageInfo { font-size: var(--text-sm); color: var(--color-text-secondary); }
 
 /* Modal */
-.modalOverlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); z-index: var(--z-modal); display: flex; align-items: center; justify-content: center; padding: 16px; animation: fadeIn 0.15s ease; }
-.modal { background: var(--color-bg); border-radius: var(--radius-xl); box-shadow: var(--shadow-xl); width: 100%; max-width: 520px; padding: 28px; animation: slideUp 0.2s ease; max-height: 90vh; overflow-y: auto; }
+.modalOverlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(4px); z-index: var(--z-modal); display: flex; align-items: center; justify-content: center; padding: 16px; animation: fadeIn 0.15s ease; }
+.modal { background: #FFFFFF; border: 1px solid var(--color-border); border-radius: var(--radius-xl); box-shadow: var(--shadow-xl); width: 100%; max-width: 520px; padding: 28px; animation: slideUp 0.2s ease; max-height: 90vh; overflow-y: auto; }
 .modalTitle { font-size: var(--text-lg); font-weight: var(--weight-bold); color: var(--color-text); margin-bottom: 20px; }
 .modalFields { display: flex; flex-direction: column; gap: 14px; }
 .modalRow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

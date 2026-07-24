@@ -11,7 +11,8 @@ import {
   LineChart, Line, Area, AreaChart, ComposedChart,
 } from 'recharts';
 import type { PieLabelRenderProps } from 'recharts';
-import { formatCurrency, formatRelativeTime, getPeriodRange, percentageChange } from '@/lib/utils';
+import { formatCurrency, formatDate, formatRelativeTime, getPeriodRange, percentageChange } from '@/lib/utils';
+import { Modal } from '@/components/ui/Modal';
 import styles from './page.module.css';
 
 // ---------- Types ----------
@@ -35,6 +36,10 @@ interface KpisResponse {
   activeClients?: KpiData;
   averageOrderValue?: KpiData;
   activeOrders?: KpiData;
+  monthlyRecurringExpense?: KpiData;
+  pendingCollection?: KpiData;
+  expenseRatio?: KpiData;
+  avgDailyExpense?: KpiData;
 }
 
 interface RevenueItem {
@@ -57,10 +62,31 @@ interface InvoiceExpenseItem {
   margin: number;
 }
 
+interface ExpenseCategoryItem {
+  name: string;
+  value: number;
+  color: string;
+  percentage: number;
+}
+
 interface TopClient {
   name: string;
   total: number;
   orders: number;
+}
+
+interface TopProduct {
+  name: string;
+  total: number;
+  orders: number;
+}
+
+interface PaymentMethodItem {
+  name: string;
+  value: number;
+  color: string;
+  count: number;
+  percentage: number;
 }
 
 interface BottleneckItem {
@@ -105,6 +131,14 @@ const DONUT_COLORS = [
   '#8B5CF6', '#EC4899', '#06B6D4', '#F97316',
 ];
 
+const RECURRENCE_MAP: Record<string, string> = {
+  weekly: 'Semanal',
+  biweekly: 'Quincenal',
+  monthly: 'Mensual',
+  quarterly: 'Trimestral',
+  yearly: 'Anual',
+};
+
 // ---------- Helpers ----------
 
 function tsToDateInput(ts: number): string {
@@ -131,12 +165,26 @@ export default function DashboardPage() {
   const [revenue, setRevenue] = useState<RevenueItem[]>([]);
   const [production, setProduction] = useState<ProductionItem[]>([]);
   const [invoiceVsExpenses, setInvoiceVsExpenses] = useState<InvoiceExpenseItem[]>([]);
+  const [expenseLabData, setExpenseLabData] = useState<ExpenseCategoryItem[]>([]);
+  const [expenseLabTotal, setExpenseLabTotal] = useState(0);
+  const [expensePersonalData, setExpensePersonalData] = useState<ExpenseCategoryItem[]>([]);
+  const [expensePersonalTotal, setExpensePersonalTotal] = useState(0);
   const [topClients, setTopClients] = useState<TopClient[]>([]);
+  const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodItem[]>([]);
+  const [paymentMethodsTotal, setPaymentMethodsTotal] = useState(0);
   const [bottlenecks, setBottlenecks] = useState<BottleneckItem[]>([]);
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [selectedWorkflow, setSelectedWorkflow] = useState('');
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // KPI Detail Modal state
+  const [kpiModalOpen, setKpiModalOpen] = useState(false);
+  const [kpiModalTitle, setKpiModalTitle] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [kpiModalData, setKpiModalData] = useState<any>(null);
+  const [kpiModalLoading, setKpiModalLoading] = useState(false);
 
   const getRange = useCallback((): { from: number; to: number } => {
     if (period === 'custom' && customFrom && customTo) {
@@ -152,21 +200,27 @@ export default function DashboardPage() {
     const expenseQs = `${qs}&expenseScope=${expenseScope}`;
 
     try {
-      const [kpiRes, revRes, prodRes, iveRes, topRes, actRes] = await Promise.all([
+      const [kpiRes, revRes, prodRes, iveRes, expCatRes, topRes, topProdRes, payMethodRes, actRes] = await Promise.all([
         fetch(`/api/dashboard/kpis?${expenseQs}`),
         fetch(`/api/dashboard/revenue?${qs}`),
         fetch(`/api/dashboard/production?${qs}`),
         fetch(`/api/dashboard/invoice-vs-expenses?${expenseQs}`),
+        fetch(`/api/dashboard/expense-categories?${expenseQs}`),
         fetch(`/api/dashboard/top-clients?${qs}`),
+        fetch(`/api/dashboard/top-products?${qs}`),
+        fetch(`/api/dashboard/payment-methods?${qs}`),
         fetch('/api/dashboard/activity'),
       ]);
 
-      const [kpiData, revData, prodData, iveData, topData, actData] = await Promise.all([
+      const [kpiData, revData, prodData, iveData, expCatData, topData, topProdData, payMethodData, actData] = await Promise.all([
         kpiRes.json(),
         revRes.json(),
         prodRes.json(),
         iveRes.json(),
+        expCatRes.json(),
         topRes.json(),
+        topProdRes.json(),
+        payMethodRes.json(),
         actRes.json(),
       ]);
 
@@ -174,7 +228,20 @@ export default function DashboardPage() {
       if (revData.data) setRevenue(revData.data);
       if (prodData.data) setProduction(prodData.data);
       if (iveData.data) setInvoiceVsExpenses(iveData.data);
+      if (expCatData.lab) {
+        setExpenseLabData(expCatData.lab.data || []);
+        setExpenseLabTotal(expCatData.lab.totalSum || 0);
+      }
+      if (expCatData.personal) {
+        setExpensePersonalData(expCatData.personal.data || []);
+        setExpensePersonalTotal(expCatData.personal.totalSum || 0);
+      }
       if (topData.data) setTopClients(topData.data);
+      if (topProdData.data) setTopProducts(topProdData.data);
+      if (payMethodData.data) {
+        setPaymentMethods(payMethodData.data);
+        setPaymentMethodsTotal(payMethodData.totalSum || 0);
+      }
       if (actData.data) setActivity(actData.data);
     } catch {
       // Silent fail — individual charts show empty states
@@ -202,6 +269,25 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchBottlenecks(selectedWorkflow);
   }, [selectedWorkflow, fetchBottlenecks]);
+
+  // KPI Detail Modal handler
+  async function openKpiDetail(kpiKey: string, title: string) {
+    setKpiModalTitle(title);
+    setKpiModalOpen(true);
+    setKpiModalLoading(true);
+    setKpiModalData(null);
+    try {
+      const { from, to } = getRange();
+      const qs = `kpi=${kpiKey}&from=${from}&to=${to}&expenseScope=${expenseScope}`;
+      const res = await fetch(`/api/dashboard/kpi-detail?${qs}`);
+      const json = await res.json();
+      if (json.data) setKpiModalData(json.data);
+    } catch {
+      // silent
+    } finally {
+      setKpiModalLoading(false);
+    }
+  }
 
   function handlePeriodChange(key: string) {
     setPeriod(key);
@@ -328,6 +414,10 @@ export default function DashboardPage() {
   const activeClientsDisplay = useCountUp(kpis?.activeClients?.value ?? 0);
   const averageOrderDisplay = useCountUp(kpis?.averageOrderValue?.value ?? 0, true);
   const activeOrdersDisplay = useCountUp(kpis?.activeOrders?.value ?? 0);
+  const monthlyRecurringDisplay = useCountUp(kpis?.monthlyRecurringExpense?.value ?? 0, true);
+  const pendingCollectionDisplay = useCountUp(kpis?.pendingCollection?.value ?? 0, true);
+  const expenseRatioDisplay = useCountUp(kpis?.expenseRatio?.value ?? 0);
+  const avgDailyExpenseDisplay = useCountUp(kpis?.avgDailyExpense?.value ?? 0, true);
 
   // Skeleton component
   function renderSkeleton() {
@@ -383,20 +473,6 @@ export default function DashboardPage() {
               ))}
             </div>
           </div>
-          <div className={styles.selectorBlock}>
-            <span className={styles.selectorLabel}>Clasificacion de gastos</span>
-            <div className={styles.periodSelector}>
-              {EXPENSE_SCOPE_OPTIONS.map((opt) => (
-                <button
-                  key={opt.key}
-                  className={`${styles.periodBtn} ${expenseScope === opt.key ? styles.periodBtnActive : ''}`}
-                  onClick={() => setExpenseScope(opt.key)}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 
@@ -424,8 +500,9 @@ export default function DashboardPage() {
         renderSkeleton()
       ) : kpis ? (
         <div className={styles.kpiGrid}>
+          {/* Fila 1: Ventas & Cobranza */}
           {/* Total Invoiced */}
-          <div className={styles.kpiCard}>
+          <div className={`${styles.kpiCard} ${styles.kpiCardClickable}`} onClick={() => openKpiDetail('totalInvoiced', 'Total Facturado')}>
             <div className={styles.kpiIconWrap} style={{ color: '#3B82F6' }}>
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="5" width="16" height="13" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M3 9h16" stroke="currentColor" strokeWidth="1.5"/><path d="M7 13h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </div>
@@ -438,7 +515,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Total Collected */}
-          <div className={styles.kpiCard}>
+          <div className={`${styles.kpiCard} ${styles.kpiCardClickable}`} onClick={() => openKpiDetail('totalCollected', 'Total Cobrado')}>
             <div className={styles.kpiIconWrap} style={{ color: '#10B981' }}>
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.5"/><path d="M11 7v4l3 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
@@ -450,8 +527,33 @@ export default function DashboardPage() {
             {renderSparkline(kpis.totalCollected.sparkline, '#10B981')}
           </div>
 
+          {/* Pendiente por Cobrar */}
+          <div className={`${styles.kpiCard} ${styles.kpiCardClickable}`} onClick={() => openKpiDetail('pendingCollection', 'Pendiente por Cobrar')}>
+            <div className={styles.kpiIconWrap} style={{ color: '#F59E0B' }}>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+            <span className={styles.kpiLabel}>Pendiente por Cobrar</span>
+            <div className={styles.kpiRow}>
+              <span className={styles.kpiValueAnimated}>{pendingCollectionDisplay}</span>
+              {kpis.pendingCollection && renderChange(kpis.pendingCollection.value, kpis.pendingCollection.previous, true)}
+            </div>
+          </div>
+
+          {/* Collection Rate */}
+          <div className={`${styles.kpiCard} ${styles.kpiCardClickable}`} onClick={() => openKpiDetail('collectionRate', 'Tasa de Cobranza')}>
+            <div className={styles.kpiIconWrap} style={{ color: '#10B981' }}>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.5"/><path d="M11 7v8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><path d="M8 10l3-3 3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+            <span className={styles.kpiLabel}>Tasa de Cobranza</span>
+            <div className={styles.kpiRow}>
+              <span className={styles.kpiValueAnimated}>{collectionRateDisplay}%</span>
+              {kpis.collectionRate && renderChange(kpis.collectionRate.value, kpis.collectionRate.previous)}
+            </div>
+          </div>
+
+          {/* Fila 2: Operación & Producción */}
           {/* New Orders */}
-          <div className={styles.kpiCard}>
+          <div className={`${styles.kpiCard} ${styles.kpiCardClickable}`} onClick={() => openKpiDetail('newOrders', 'Pedidos Nuevos')}>
             <div className={styles.kpiIconWrap} style={{ color: '#6366F1' }}>
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 5h14M4 9h14M4 13h10M4 17h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </div>
@@ -462,8 +564,19 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Active Orders (In Progress) */}
+          <div className={`${styles.kpiCard} ${styles.kpiCardClickable}`} onClick={() => openKpiDetail('activeOrders', 'Órdenes en Proceso')}>
+            <div className={styles.kpiIconWrap} style={{ color: '#EC4899' }}>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+            <span className={styles.kpiLabel}>Órdenes en Proceso</span>
+            <div className={styles.kpiRow}>
+              <span className={styles.kpiValueAnimated}>{activeOrdersDisplay}</span>
+            </div>
+          </div>
+
           {/* Completed Orders */}
-          <div className={styles.kpiCard}>
+          <div className={`${styles.kpiCard} ${styles.kpiCardClickable}`} onClick={() => openKpiDetail('completedOrders', 'Pedidos Completados')}>
             <div className={styles.kpiIconWrap} style={{ color: '#8B5CF6' }}>
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.5"/><path d="M8 11l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
@@ -474,8 +587,21 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Average Order Value */}
+          <div className={`${styles.kpiCard} ${styles.kpiCardClickable}`} onClick={() => openKpiDetail('averageOrderValue', 'Ticket Promedio')}>
+            <div className={styles.kpiIconWrap} style={{ color: '#8B5CF6' }}>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 11h6l2 5 3-10 2 5h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+            <span className={styles.kpiLabel}>Ticket Promedio</span>
+            <div className={styles.kpiRow}>
+              <span className={styles.kpiValueAnimated}>{averageOrderDisplay}</span>
+              {kpis.averageOrderValue && renderChange(kpis.averageOrderValue.value, kpis.averageOrderValue.previous)}
+            </div>
+          </div>
+
+          {/* Fila 3: Gastos & Rentabilidad */}
           {/* Expenses */}
-          <div className={styles.kpiCard}>
+          <div className={`${styles.kpiCard} ${styles.kpiCardClickable}`} onClick={() => openKpiDetail('totalExpenses', selectedExpenseLabel)}>
             <div className={styles.kpiIconWrap} style={{ color: '#EF4444' }}>
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M5 4h12a1 1 0 011 1v12a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.5"/><path d="M7 8h8M7 11h6M7 14h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </div>
@@ -486,7 +612,8 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className={styles.kpiCard}>
+          {/* Lab Expenses */}
+          <div className={`${styles.kpiCard} ${styles.kpiCardClickable}`} onClick={() => openKpiDetail('labExpenses', 'Gastos Laboratorio')}>
             <div className={styles.kpiIconWrap} style={{ color: '#3B82F6' }}>
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="4" y="5" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M7 9h8M7 12h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </div>
@@ -498,7 +625,8 @@ export default function DashboardPage() {
             {renderSparkline(kpis.labExpenses?.sparkline, '#3B82F6')}
           </div>
 
-          <div className={styles.kpiCard}>
+          {/* Personal Expenses */}
+          <div className={`${styles.kpiCard} ${styles.kpiCardClickable}`} onClick={() => openKpiDetail('personalExpenses', 'Gastos Personales')}>
             <div className={styles.kpiIconWrap} style={{ color: '#EC4899' }}>
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 18s-5-3.35-7-6.29C2.42 9.3 3.2 6 6.48 6c1.74 0 2.86.92 3.52 2 .66-1.08 1.78-2 3.52-2C16.8 6 17.58 9.3 18 11.71 16 14.65 11 18 11 18z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
@@ -511,7 +639,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Net Margin */}
-          <div className={styles.kpiCard}>
+          <div className={`${styles.kpiCard} ${styles.kpiCardClickable}`} onClick={() => openKpiDetail('netMargin', 'Margen Neto')}>
             <div className={styles.kpiIconWrap} style={{ color: (kpis.netMargin?.value ?? 0) >= 0 ? '#10B981' : '#EF4444' }}>
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 17l4-4 3 3 5-5 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M15 7h4v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
@@ -522,20 +650,32 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Collection Rate */}
-          <div className={styles.kpiCard}>
-            <div className={styles.kpiIconWrap} style={{ color: '#F59E0B' }}>
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.5"/><path d="M11 7v8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><path d="M8 10l3-3 3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          {/* Fila 4: Gastos Recurrentes & Eficiencia (Nueva Fila) */}
+          {/* Gasto Recurrente Mensual (Prorrateado) */}
+          <div className={`${styles.kpiCard} ${styles.kpiCardClickable}`} onClick={() => openKpiDetail('monthlyRecurringExpense', 'Gasto Recurrente Mensual')}>
+            <div className={styles.kpiIconWrap} style={{ color: '#8B5CF6' }}>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
-            <span className={styles.kpiLabel}>Tasa de Cobranza</span>
+            <span className={styles.kpiLabel}>Gasto Recurrente Mensual</span>
             <div className={styles.kpiRow}>
-              <span className={styles.kpiValueAnimated}>{collectionRateDisplay}%</span>
-              {kpis.collectionRate && renderChange(kpis.collectionRate.value, kpis.collectionRate.previous)}
+              <span className={styles.kpiValueAnimated}>{monthlyRecurringDisplay}</span>
+            </div>
+          </div>
+
+          {/* Ratio Gastos / Ingresos */}
+          <div className={`${styles.kpiCard} ${styles.kpiCardClickable}`} onClick={() => openKpiDetail('expenseRatio', 'Ratio Gastos / Ingresos')}>
+            <div className={styles.kpiIconWrap} style={{ color: '#EF4444' }}>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M7 17L17 7M9 7h8v8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+            <span className={styles.kpiLabel}>Ratio Gastos / Ingresos</span>
+            <div className={styles.kpiRow}>
+              <span className={styles.kpiValueAnimated}>{expenseRatioDisplay}%</span>
+              {kpis.expenseRatio && renderChange(kpis.expenseRatio.value, kpis.expenseRatio.previous, true)}
             </div>
           </div>
 
           {/* Active Clients */}
-          <div className={styles.kpiCard}>
+          <div className={`${styles.kpiCard} ${styles.kpiCardClickable}`} onClick={() => openKpiDetail('activeClients', 'Clientes Activos')}>
             <div className={styles.kpiIconWrap} style={{ color: '#14B8A6' }}>
               <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.5"/><path d="M4.5 19c0-3.59 2.91-6.5 6.5-6.5s6.5 2.91 6.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </div>
@@ -545,34 +685,22 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Average Order Value */}
-          <div className={styles.kpiCard}>
-            <div className={styles.kpiIconWrap} style={{ color: '#8B5CF6' }}>
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 11h6l2 5 3-10 2 5h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          {/* Promedio Gasto Diario */}
+          <div className={`${styles.kpiCard} ${styles.kpiCardClickable}`} onClick={() => openKpiDetail('totalExpenses', 'Gasto Diario Promedio')}>
+            <div className={styles.kpiIconWrap} style={{ color: '#F97316' }}>
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="4" y="5" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M7 9h8M7 12h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
             </div>
-            <span className={styles.kpiLabel}>Ticket Promedio</span>
+            <span className={styles.kpiLabel}>Gasto Diario Promedio</span>
             <div className={styles.kpiRow}>
-              <span className={styles.kpiValueAnimated}>{averageOrderDisplay}</span>
-              {kpis.averageOrderValue && renderChange(kpis.averageOrderValue.value, kpis.averageOrderValue.previous)}
-            </div>
-          </div>
-
-          {/* Active Orders (In Progress) */}
-          <div className={styles.kpiCard}>
-            <div className={styles.kpiIconWrap} style={{ color: '#EC4899' }}>
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </div>
-            <span className={styles.kpiLabel}>Órdenes en Proceso</span>
-            <div className={styles.kpiRow}>
-              <span className={styles.kpiValueAnimated}>{activeOrdersDisplay}</span>
+              <span className={styles.kpiValueAnimated}>{avgDailyExpenseDisplay}</span>
             </div>
           </div>
         </div>
       ) : null}
 
-      {/* Charts Row 1 */}
+      {/* Charts Grid */}
       <div className={styles.chartGrid}>
-        {/* Revenue: Invoiced vs Collected */}
+        {/* Row 1 (Full): Revenue: Invoiced vs Collected */}
         <div className={`${styles.chartCard} ${styles.chartFull}`}>
           <div className={styles.chartHeader}>
             <h3 className={styles.chartTitle}>Facturación vs Cobranza</h3>
@@ -588,6 +716,16 @@ export default function DashboardPage() {
             ) : (
               <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <BarChart data={revenue} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                  <defs>
+                    <linearGradient id="colorInvoiced" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#3B82F6" stopOpacity={1}/>
+                      <stop offset="100%" stopColor="#2563EB" stopOpacity={0.8}/>
+                    </linearGradient>
+                    <linearGradient id="colorCollected" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#10B981" stopOpacity={1}/>
+                      <stop offset="100%" stopColor="#059669" stopOpacity={0.8}/>
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
                   <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `$${v}`} />
@@ -598,8 +736,8 @@ export default function DashboardPage() {
                       String(name) === 'invoiced' ? 'Facturado' : 'Cobrado'
                     ]}
                   />
-                  <Bar dataKey="invoiced" name="invoiced" fill="#3B82F6" radius={[4, 4, 0, 0]} barSize={20} />
-                  <Bar dataKey="collected" name="collected" fill="#10B981" radius={[4, 4, 0, 0]} barSize={20} />
+                  <Bar dataKey="invoiced" name="invoiced" fill="url(#colorInvoiced)" radius={[6, 6, 0, 0]} barSize={20} />
+                  <Bar dataKey="collected" name="collected" fill="url(#colorCollected)" radius={[6, 6, 0, 0]} barSize={20} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -614,51 +752,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Production Distribution (Donut) */}
-        <div className={styles.chartCard}>
-          <div className={styles.chartHeader}>
-            <h3 className={styles.chartTitle}>Distribución por Flujo</h3>
-          </div>
-          <div className={styles.chartContainer}>
-            {production.length === 0 ? (
-              <div className={styles.emptyChart}>
-                <span className={styles.emptyIcon}>
-                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="10" stroke="currentColor" strokeWidth="1.5"/><path d="M16 6a10 10 0 0110 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/></svg>
-                </span>
-                <span>Sin datos en el periodo</span>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                <PieChart>
-                  <Pie
-                    data={production}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={3}
-                    dataKey="value"
-                    nameKey="name"
-                    label={(props: PieLabelRenderProps) =>
-                      `${String(props.name || '')} (${((Number(props.percent) || 0) * 100).toFixed(0)}%)`
-                    }
-                    labelLine={false}
-                  >
-                    {production.map((_, idx) => (
-                      <Cell key={idx} fill={DONUT_COLORS[idx % DONUT_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={tooltipStyle}
-                    formatter={(value: unknown) => [Number(value), 'Pedidos']}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div>
-
-        {/* Facturación vs Gastos (Bar + Line) */}
+        {/* Row 2 (Pair Col 1): Facturación vs Gastos */}
         <div className={styles.chartCard}>
           <div className={styles.chartHeader}>
             <h3 className={styles.chartTitle}>Facturación vs {selectedExpenseLabel}</h3>
@@ -708,6 +802,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Row 2 (Pair Col 2): Gastos Personales vs Laboratorio */}
         <div className={styles.chartCard}>
           <div className={styles.chartHeader}>
             <h3 className={styles.chartTitle}>Gastos Personales vs Laboratorio</h3>
@@ -749,10 +844,274 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Top 5 Clients (Horizontal Bar) */}
+        {/* Row 3 (Col 1): Gastos de Laboratorio (Donut Card Separada) */}
         <div className={styles.chartCard}>
           <div className={styles.chartHeader}>
-            <h3 className={styles.chartTitle}>Top 5 Clientes</h3>
+            <h3 className={styles.chartTitle}>Gastos de Laboratorio</h3>
+            <span style={{ color: '#3B82F6', fontWeight: 600, fontSize: '13px' }}>
+              {formatCurrency(expenseLabTotal)}
+            </span>
+          </div>
+          <div className={styles.chartContainer} style={{ position: 'relative' }}>
+            {expenseLabData.length === 0 ? (
+              <div className={styles.emptyChart}>
+                <span>Sin gastos de laboratorio</span>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                <PieChart>
+                  <Pie
+                    data={expenseLabData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={85}
+                    paddingAngle={3}
+                    dataKey="value"
+                    nameKey="name"
+                  >
+                    {expenseLabData.map((item, idx) => (
+                      <Cell key={idx} fill={item.color || DONUT_COLORS[idx % DONUT_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={tooltipStyle}
+                    formatter={(value: unknown) => [formatCurrency(Number(value)), 'Monto']}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+          {expenseLabData.length > 0 && (
+            <div className={styles.chartLegend} style={{ flexWrap: 'wrap', gap: '8px 12px', marginTop: '12px' }}>
+              {expenseLabData.map((item, idx) => (
+                <span key={idx} className={styles.legendItem}>
+                  <span className={styles.legendDot} style={{ background: item.color || DONUT_COLORS[idx % DONUT_COLORS.length] }} />
+                  {item.name}: {formatCurrency(item.value)} ({item.percentage}%)
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Row 3 (Col 2): Gastos Personales (Donut Card Separada) */}
+        <div className={styles.chartCard}>
+          <div className={styles.chartHeader}>
+            <h3 className={styles.chartTitle}>Gastos Personales</h3>
+            <span style={{ color: '#EC4899', fontWeight: 600, fontSize: '13px' }}>
+              {formatCurrency(expensePersonalTotal)}
+            </span>
+          </div>
+          <div className={styles.chartContainer} style={{ position: 'relative' }}>
+            {expensePersonalData.length === 0 ? (
+              <div className={styles.emptyChart}>
+                <span>Sin gastos personales</span>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                <PieChart>
+                  <Pie
+                    data={expensePersonalData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={85}
+                    paddingAngle={3}
+                    dataKey="value"
+                    nameKey="name"
+                  >
+                    {expensePersonalData.map((item, idx) => (
+                      <Cell key={idx} fill={item.color || DONUT_COLORS[idx % DONUT_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={tooltipStyle}
+                    formatter={(value: unknown) => [formatCurrency(Number(value)), 'Monto']}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+          {expensePersonalData.length > 0 && (
+            <div className={styles.chartLegend} style={{ flexWrap: 'wrap', gap: '8px 12px', marginTop: '12px' }}>
+              {expensePersonalData.map((item, idx) => (
+                <span key={idx} className={styles.legendItem}>
+                  <span className={styles.legendDot} style={{ background: item.color || DONUT_COLORS[idx % DONUT_COLORS.length] }} />
+                  {item.name}: {formatCurrency(item.value)} ({item.percentage}%)
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Row 4 (Pair Col 1): Production Distribution (Donut) */}
+        <div className={styles.chartCard}>
+          <div className={styles.chartHeader}>
+            <h3 className={styles.chartTitle}>Distribución por Flujo</h3>
+          </div>
+          <div className={styles.chartContainer} style={{ position: 'relative' }}>
+            {production.length === 0 ? (
+              <div className={styles.emptyChart}>
+                <span className={styles.emptyIcon}>
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="10" stroke="currentColor" strokeWidth="1.5"/><path d="M16 6a10 10 0 0110 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/></svg>
+                </span>
+                <span>Sin datos en el periodo</span>
+              </div>
+            ) : (
+              <>
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                  <PieChart>
+                    <Pie
+                      data={production}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={90}
+                      paddingAngle={4}
+                      dataKey="value"
+                      nameKey="name"
+                    >
+                      {production.map((_, idx) => (
+                        <Cell key={idx} fill={DONUT_COLORS[idx % DONUT_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={tooltipStyle}
+                      formatter={(value: unknown) => [`${Number(value)} pedidos`, 'Cantidad']}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className={styles.donutCenter} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none' }}>
+                  <span className={styles.donutCenterValue}>
+                    {production.reduce((acc, curr) => acc + curr.value, 0)}
+                  </span>
+                  <span className={styles.donutCenterLabel}>Pedidos</span>
+                </div>
+              </>
+            )}
+          </div>
+          {production.length > 0 && (
+            <div className={styles.chartLegend} style={{ flexWrap: 'wrap', gap: '8px 12px' }}>
+              {production.map((item, idx) => (
+                <span key={idx} className={styles.legendItem}>
+                  <span className={styles.legendDot} style={{ background: DONUT_COLORS[idx % DONUT_COLORS.length] }} />
+                  {item.name}: {item.value}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Row 4 (Pair Col 2): Métodos de Cobro (Payment Methods Donut) */}
+        <div className={styles.chartCard}>
+          <div className={styles.chartHeader}>
+            <h3 className={styles.chartTitle}>Métodos de Cobro</h3>
+          </div>
+          <div className={styles.chartContainer} style={{ position: 'relative' }}>
+            {paymentMethods.length === 0 ? (
+              <div className={styles.emptyChart}>
+                <span className={styles.emptyIcon}>
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="4" y="8" width="24" height="16" rx="2" stroke="currentColor" strokeWidth="1.5"/><path d="M4 14h24" stroke="currentColor" strokeWidth="1.5"/></svg>
+                </span>
+                <span>Sin cobros en el periodo</span>
+              </div>
+            ) : (
+              <>
+                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                  <PieChart>
+                    <Pie
+                      data={paymentMethods}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={85}
+                      paddingAngle={4}
+                      dataKey="value"
+                      nameKey="name"
+                    >
+                      {paymentMethods.map((item, idx) => (
+                        <Cell key={idx} fill={item.color || DONUT_COLORS[idx % DONUT_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={tooltipStyle}
+                      formatter={(value: unknown) => [formatCurrency(Number(value)), 'Monto Cobrado']}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className={styles.donutCenter} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none' }}>
+                  <span className={styles.donutCenterValue}>{formatCurrency(paymentMethodsTotal)}</span>
+                  <span className={styles.donutCenterLabel}>Total Cobrado</span>
+                </div>
+              </>
+            )}
+          </div>
+          {paymentMethods.length > 0 && (
+            <div className={styles.chartLegend} style={{ flexWrap: 'wrap', gap: '8px 12px' }}>
+              {paymentMethods.map((item, idx) => (
+                <span key={idx} className={styles.legendItem}>
+                  <span className={styles.legendDot} style={{ background: item.color || DONUT_COLORS[idx % DONUT_COLORS.length] }} />
+                  {item.name}: {formatCurrency(item.value)} ({item.percentage}%)
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Row 5 (Pair Col 1): Top 5 Productos / Trabajos */}
+        <div className={styles.chartCard}>
+          <div className={styles.chartHeader}>
+            <h3 className={styles.chartTitle}>Top 5 Productos más Solicitados</h3>
+          </div>
+          <div className={styles.chartContainer}>
+            {topProducts.length === 0 ? (
+              <div className={styles.emptyChart}>
+                <span className={styles.emptyIcon}>
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M4 8h24M4 16h24M4 24h24" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                </span>
+                <span>Sin datos en el periodo</span>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                <BarChart
+                  data={topProducts}
+                  layout="vertical"
+                  margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" horizontal={false} />
+                  <XAxis
+                    type="number"
+                    tick={{ fontSize: 11, fill: '#9CA3AF' }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v: number) => `$${v}`}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    tick={{ fontSize: 11, fill: '#4B5563' }}
+                    width={110}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={tooltipStyle}
+                    formatter={(value: unknown, _: unknown, entry: { payload?: TopProduct }) => [
+                      `${formatCurrency(Number(value))} (${entry.payload?.orders || 0} pedidos)`,
+                      'Total Facturado'
+                    ]}
+                  />
+                  <Bar dataKey="total" fill="#8B5CF6" radius={[0, 6, 6, 0]} barSize={18} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+
+        {/* Row 5 (Pair Col 2): Top 5 Clientes */}
+        <div className={styles.chartCard}>
+          <div className={styles.chartHeader}>
+            <h3 className={styles.chartTitle}>Top 5 Clientes (Facturación)</h3>
           </div>
           <div className={styles.chartContainer}>
             {topClients.length === 0 ? (
@@ -780,24 +1139,27 @@ export default function DashboardPage() {
                   <YAxis
                     type="category"
                     dataKey="name"
-                    tick={{ fontSize: 11, fill: '#6B7280' }}
-                    width={100}
+                    tick={{ fontSize: 11, fill: '#4B5563' }}
+                    width={110}
                     axisLine={false}
                     tickLine={false}
                   />
                   <Tooltip
                     contentStyle={tooltipStyle}
-                    formatter={(value: unknown) => [formatCurrency(Number(value)), 'Facturado']}
+                    formatter={(value: unknown, _: unknown, entry: { payload?: TopClient }) => [
+                      `${formatCurrency(Number(value))} (${entry.payload?.orders || 0} pedidos)`,
+                      'Total Facturado'
+                    ]}
                   />
-                  <Bar dataKey="total" fill="#F59E0B" radius={[0, 4, 4, 0]} barSize={18} />
+                  <Bar dataKey="total" fill="#F59E0B" radius={[0, 6, 6, 0]} barSize={18} />
                 </BarChart>
               </ResponsiveContainer>
             )}
           </div>
         </div>
 
-        {/* Bottlenecks (Horizontal Bar) */}
-        <div className={styles.chartCard}>
+        {/* Row 6 (Full): Bottlenecks */}
+        <div className={`${styles.chartCard} ${styles.chartFull}`}>
           <div className={styles.chartHeader}>
             <h3 className={styles.chartTitle}>Cuellos de Botella</h3>
             <select
@@ -817,12 +1179,12 @@ export default function DashboardPage() {
                 <span className={styles.emptyIcon}>
                   <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="10" stroke="currentColor" strokeWidth="1.5"/><path d="M16 10v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </span>
-                <span>Sin datos de transiciones</span>
+                <span>Sin datos suficientes para calcular cuellos de botella</span>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <BarChart
-                  data={bottlenecks.filter((b) => b.avgHours > 0)}
+                  data={bottlenecks}
                   layout="vertical"
                   margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
                 >
@@ -837,16 +1199,19 @@ export default function DashboardPage() {
                   <YAxis
                     type="category"
                     dataKey="stepName"
-                    tick={{ fontSize: 11, fill: '#6B7280' }}
-                    width={100}
+                    tick={{ fontSize: 11, fill: '#4B5563' }}
+                    width={130}
                     axisLine={false}
                     tickLine={false}
                   />
                   <Tooltip
                     contentStyle={tooltipStyle}
-                    formatter={(value: unknown) => [`${Number(value)} horas`, 'Tiempo promedio']}
+                    formatter={(value: unknown, _: unknown, entry: { payload?: BottleneckItem }) => [
+                      `${Number(value)} hrs promedio (${entry.payload?.orderCount || 0} trabajos)`,
+                      'Tiempo en paso'
+                    ]}
                   />
-                  <Bar dataKey="avgHours" fill="#EF4444" radius={[0, 4, 4, 0]} barSize={18} />
+                  <Bar dataKey="avgHours" fill="#EF4444" radius={[0, 6, 6, 0]} barSize={18} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -885,6 +1250,297 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* KPI Detail Modal */}
+      <Modal
+        isOpen={kpiModalOpen}
+        onClose={() => setKpiModalOpen(false)}
+        title={kpiModalTitle}
+        size="lg"
+      >
+        {kpiModalLoading ? (
+          <div className={styles.loadingSpinner}>
+            <div className={styles.spinner} />
+          </div>
+        ) : kpiModalData ? (
+          <div className={styles.kpiModalContent}>
+            {/* Orders table (totalInvoiced, newOrders, averageOrderValue) */}
+            {kpiModalData.type === 'orders' && (
+              <table className={styles.kpiModalTable}>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Paciente</th>
+                    <th>Cliente</th>
+                    <th>Precio</th>
+                    <th>Fecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {kpiModalData.rows.map((r: { id: string; orderNumber: number; patientName: string; clientName: string; finalPriceUsd: number; createdAt: number }) => (
+                    <tr key={r.id}>
+                      <td>{r.orderNumber}</td>
+                      <td>{r.patientName}</td>
+                      <td>{r.clientName}</td>
+                      <td>{formatCurrency(r.finalPriceUsd)}</td>
+                      <td>{formatDate(r.createdAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            {/* Payments table (totalCollected, collectionRate) */}
+            {kpiModalData.type === 'payments' && (
+              <table className={styles.kpiModalTable}>
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>Monto</th>
+                    <th>Método</th>
+                    <th>Referencia</th>
+                    <th>Fecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {kpiModalData.rows.map((r: { id: string; clientName: string; amountUsd: number; paymentMethod: string; reference: string; paymentDate: number }) => (
+                    <tr key={r.id}>
+                      <td>{r.clientName}</td>
+                      <td>{formatCurrency(r.amountUsd)}</td>
+                      <td>{r.paymentMethod || '—'}</td>
+                      <td>{r.reference || '—'}</td>
+                      <td>{formatDate(r.paymentDate)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            {/* Completed Orders table */}
+            {kpiModalData.type === 'completedOrders' && (
+              <table className={styles.kpiModalTable}>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Paciente</th>
+                    <th>Cliente</th>
+                    <th>Precio</th>
+                    <th>Completado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {kpiModalData.rows.map((r: { id: string; orderNumber: number; patientName: string; clientName: string; finalPriceUsd: number; completedAt: number }) => (
+                    <tr key={r.id}>
+                      <td>{r.orderNumber}</td>
+                      <td>{r.patientName}</td>
+                      <td>{r.clientName}</td>
+                      <td>{formatCurrency(r.finalPriceUsd)}</td>
+                      <td>{formatDate(r.completedAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            {/* Expenses table */}
+            {kpiModalData.type === 'expenses' && (
+              <table className={styles.kpiModalTable}>
+                <thead>
+                  <tr>
+                    <th>Descripción</th>
+                    <th>Categoría</th>
+                    <th>Monto</th>
+                    <th>Método</th>
+                    <th>Fecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {kpiModalData.rows.map((r: { id: string; description: string; categoryName: string; amountUsd: number; paymentMethod: string; expenseDate: number; isPersonal: boolean }) => (
+                    <tr key={r.id}>
+                      <td>{r.description}</td>
+                      <td>
+                        {r.categoryName || '—'}
+                        {r.isPersonal && <span className={styles.kpiModalBadge}>Personal</span>}
+                      </td>
+                      <td>{formatCurrency(r.amountUsd)}</td>
+                      <td>{r.paymentMethod || '—'}</td>
+                      <td>{formatDate(r.expenseDate)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            {/* Recurring Expenses table */}
+            {kpiModalData.type === 'recurringExpenses' && (
+              <table className={styles.kpiModalTable}>
+                <thead>
+                  <tr>
+                    <th>Descripción</th>
+                    <th>Categoría</th>
+                    <th>Frecuencia</th>
+                    <th>Monto Recurrente</th>
+                    <th>Prorrateo Mensual</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {kpiModalData.rows.map((r: { id: string; description: string; categoryName: string; amountUsd: number; recurrenceInterval: string; monthlyProrated: number; isPersonal: boolean }) => (
+                    <tr key={r.id}>
+                      <td>{r.description || 'Sin descripción'}</td>
+                      <td>
+                        {r.categoryName || '—'}
+                        {r.isPersonal && <span className={styles.kpiModalBadge} style={{ marginLeft: 6 }}>Personal</span>}
+                      </td>
+                      <td>
+                        <span className={styles.recurringBadge}>
+                          {RECURRENCE_MAP[r.recurrenceInterval || 'monthly'] || r.recurrenceInterval || 'Mensual'}
+                        </span>
+                      </td>
+                      <td>{formatCurrency(r.amountUsd || 0)}</td>
+                      <td style={{ fontWeight: 600, color: '#8B5CF6' }}>
+                        {formatCurrency(r.monthlyProrated || 0)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            {/* Margin breakdown */}
+            {(kpiModalData.type === 'margin' || kpiModalData.type === 'expenseRatio') && (
+              <div className={styles.kpiModalBreakdown}>
+                <div className={styles.kpiModalBreakdownItem}>
+                  <span className={styles.kpiModalBreakdownLabel}>Total Facturado</span>
+                  <span className={styles.kpiModalBreakdownValue}>{formatCurrency(kpiModalData.rows.invoiced)}</span>
+                </div>
+                <div className={styles.kpiModalBreakdownItem}>
+                  <span className={styles.kpiModalBreakdownLabel}>Total Cobrado</span>
+                  <span className={styles.kpiModalBreakdownValue} style={{ color: '#10B981' }}>{formatCurrency(kpiModalData.rows.collected)}</span>
+                </div>
+                <div className={styles.kpiModalBreakdownDivider} />
+                <div className={styles.kpiModalBreakdownItem}>
+                  <span className={styles.kpiModalBreakdownLabel}>Gastos Laboratorio</span>
+                  <span className={styles.kpiModalBreakdownValue} style={{ color: '#EF4444' }}>−{formatCurrency(kpiModalData.rows.labExpenses)}</span>
+                </div>
+                <div className={styles.kpiModalBreakdownItem}>
+                  <span className={styles.kpiModalBreakdownLabel}>Gastos Personales</span>
+                  <span className={styles.kpiModalBreakdownValue} style={{ color: '#EF4444' }}>−{formatCurrency(kpiModalData.rows.personalExpenses)}</span>
+                </div>
+                <div className={styles.kpiModalBreakdownItem}>
+                  <span className={styles.kpiModalBreakdownLabel}>Total Gastos</span>
+                  <span className={styles.kpiModalBreakdownValue} style={{ color: '#EF4444' }}>−{formatCurrency(kpiModalData.rows.totalExpenses)}</span>
+                </div>
+                {kpiModalData.type === 'expenseRatio' && (
+                  <div className={styles.kpiModalBreakdownItem}>
+                    <span className={styles.kpiModalBreakdownLabel}>Ratio Gastos / Ingresos</span>
+                    <span className={styles.kpiModalBreakdownValue} style={{ color: '#EF4444', fontWeight: 600 }}>
+                      {kpiModalData.rows.expenseRatio}%
+                    </span>
+                  </div>
+                )}
+                <div className={styles.kpiModalBreakdownDivider} />
+                <div className={`${styles.kpiModalBreakdownItem} ${styles.kpiModalBreakdownTotal}`}>
+                  <span className={styles.kpiModalBreakdownLabel}>Margen Neto</span>
+                  <span className={styles.kpiModalBreakdownValue} style={{ color: kpiModalData.rows.margin >= 0 ? '#10B981' : '#EF4444', fontWeight: 700, fontSize: '1.25rem' }}>
+                    {formatCurrency(kpiModalData.rows.margin)}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Pending Collection table */}
+            {kpiModalData.type === 'pendingCollection' && (
+              <table className={styles.kpiModalTable}>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Paciente</th>
+                    <th>Cliente</th>
+                    <th>Total</th>
+                    <th>Pagado</th>
+                    <th>Saldo Pendiente</th>
+                    <th>Fecha</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {kpiModalData.rows.map((r: { id: string; orderNumber: number; patientName: string; clientName: string; finalPriceUsd: number; amountPaidUsd: number; pendingBalance: number; createdAt: number }) => (
+                    <tr key={r.id}>
+                      <td>{r.orderNumber}</td>
+                      <td>{r.patientName}</td>
+                      <td>{r.clientName}</td>
+                      <td>{formatCurrency(r.finalPriceUsd)}</td>
+                      <td style={{ color: '#10B981' }}>{formatCurrency(r.amountPaidUsd || 0)}</td>
+                      <td style={{ color: '#F59E0B', fontWeight: 600 }}>{formatCurrency(r.pendingBalance || 0)}</td>
+                      <td>{formatDate(r.createdAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            {/* Clients list */}
+            {kpiModalData.type === 'clients' && (
+              <table className={styles.kpiModalTable}>
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Clínica</th>
+                    <th>Teléfono</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {kpiModalData.rows.map((r: { id: string; name: string; clinicName: string; phone: string }) => (
+                    <tr key={r.id}>
+                      <td>{r.name}</td>
+                      <td>{r.clinicName || '—'}</td>
+                      <td>{r.phone || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            {/* Active Orders table */}
+            {kpiModalData.type === 'activeOrders' && (
+              <table className={styles.kpiModalTable}>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Paciente</th>
+                    <th>Cliente</th>
+                    <th>Paso Actual</th>
+                    <th>Precio</th>
+                    <th>Creado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {kpiModalData.rows.map((r: { id: string; orderNumber: number; patientName: string; clientName: string; currentStepName: string; finalPriceUsd: number; createdAt: number }) => (
+                    <tr key={r.id}>
+                      <td>{r.orderNumber}</td>
+                      <td>{r.patientName}</td>
+                      <td>{r.clientName}</td>
+                      <td><span className={styles.kpiModalBadgeStep}>{r.currentStepName}</span></td>
+                      <td>{formatCurrency(r.finalPriceUsd)}</td>
+                      <td>{formatDate(r.createdAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            {/* Empty state */}
+            {kpiModalData.rows && Array.isArray(kpiModalData.rows) && kpiModalData.rows.length === 0 && (
+              <div className={styles.emptyChart}>
+                <span>Sin datos en el periodo seleccionado</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className={styles.emptyChart}>
+            <span>No se pudieron cargar los datos</span>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

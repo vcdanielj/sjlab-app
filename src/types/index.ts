@@ -208,3 +208,77 @@ export interface CashClosing {
   notes: string | null;
   createdAt: number;
 }
+
+// ---------- Treasury Types ----------
+
+export interface TreasuryAccount {
+  id: string; // 'zelle' | 'binance' | 'efectivo' | 'bolivares'
+  name: string;
+  currency: 'USD' | 'VES';
+  initialBalance: number;
+  initialBalanceDate: number;
+  isActive: boolean;
+  updatedAt: number;
+}
+
+export interface TreasuryAccountBalance {
+  id: string;
+  name: string;
+  currency: 'USD' | 'VES';
+  initialBalance: number;
+  initialBalanceDate: number;
+  inflows: number;
+  outflows: number;
+  transfersIn: number;
+  transfersOut: number;
+  adjustmentsIn: number;
+  adjustmentsOut: number;
+  currentBalance: number;
+}
+
+export interface TreasuryTransfer {
+  id: string;
+  fromAccountId: string;
+  toAccountId: string;
+  amountFrom: number;
+  currencyFrom: 'USD' | 'VES';
+  amountTo: number;
+  currencyTo: 'USD' | 'VES';
+  exchangeRate?: number | null;
+  transferDate: number;
+  reference?: string | null;
+  notes?: string | null;
+  createdBy: string;
+  createdByName?: string;
+  createdAt: number;
+}
+
+export interface TreasuryAdjustment {
+  id: string;
+  accountId: string;
+  type: 'inflow' | 'outflow';
+  amount: number;
+  currency: 'USD' | 'VES';
+  reason: string;
+  notes?: string | null;
+  adjustmentDate: number;
+  createdBy: string;
+  createdByName?: string;
+  createdAt: number;
+}
+
+export interface AccountMovement {
+  id: string;
+  date: number;
+  type: 'cobro' | 'gasto' | 'transfer_in' | 'transfer_out' | 'adjustment_in' | 'adjustment_out';
+  accountId: string;
+  accountName: string;
+  currency: 'USD' | 'VES';
+  description: string;
+  reference?: string | null;
+  amount: number; // positive for in, negative for out
+  runningBalance: number;
+  createdBy?: string;
+  createdByName?: string;
+}
+

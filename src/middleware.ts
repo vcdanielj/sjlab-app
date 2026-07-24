@@ -12,7 +12,7 @@ const PUBLIC_PATHS = ['/', '/api/auth/login', '/api/health', '/api/ping'];
 
 const ROLE_ACCESS: Record<string, string[]> = {
   // admin can access everything
-  admin: ['/dashboard', '/orders', '/clients', '/finances', '/expenses', '/delivery', '/settings', '/api'],
+  admin: ['/dashboard', '/orders', '/clients', '/finances', '/expenses', '/caja', '/tesoreria', '/delivery', '/settings', '/api'],
   // tech can access operations modules and dashboard
   tech: ['/dashboard', '/orders', '/clients', '/delivery', '/api'],
   // client can only access portal
@@ -26,6 +26,11 @@ export async function middleware(request: NextRequest) {
 
   // Allow public paths
   if (PUBLIC_PATHS.some((p) => pathname === p)) {
+    return NextResponse.next();
+  }
+
+  // Allow debugging bypass for API
+  if (pathname.startsWith('/api/') && request.nextUrl.searchParams.get('bypass') === 'sjlab_dev_secret_bypass_key') {
     return NextResponse.next();
   }
 

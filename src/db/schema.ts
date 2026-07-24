@@ -248,6 +248,48 @@ export const cashClosings = sqliteTable('cash_closings', {
   createdAt: integer('created_at').notNull(),
 });
 
+// ---------- Treasury Accounts ----------
+export const treasuryAccounts = sqliteTable('treasury_accounts', {
+  id: text('id').primaryKey(), // zelle, binance, efectivo, bolivares
+  name: text('name').notNull(),
+  currency: text('currency', { enum: ['USD', 'VES'] }).notNull(),
+  initialBalance: real('initial_balance').notNull().default(0),
+  initialBalanceDate: integer('initial_balance_date').notNull(), // default timestamp for 2026-08-01
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  updatedAt: integer('updated_at').notNull(),
+});
+
+// ---------- Treasury Transfers ----------
+export const treasuryTransfers = sqliteTable('treasury_transfers', {
+  id: text('id').primaryKey(),
+  fromAccountId: text('from_account_id').notNull().references(() => treasuryAccounts.id),
+  toAccountId: text('to_account_id').notNull().references(() => treasuryAccounts.id),
+  amountFrom: real('amount_from').notNull(),
+  currencyFrom: text('currency_from', { enum: ['USD', 'VES'] }).notNull(),
+  amountTo: real('amount_to').notNull(),
+  currencyTo: text('currency_to', { enum: ['USD', 'VES'] }).notNull(),
+  exchangeRate: real('exchange_rate'),
+  transferDate: integer('transfer_date').notNull(),
+  reference: text('reference'),
+  notes: text('notes'),
+  createdBy: text('created_by').notNull().references(() => users.id, { onDelete: 'restrict' }),
+  createdAt: integer('created_at').notNull(),
+});
+
+// ---------- Treasury Adjustments ----------
+export const treasuryAdjustments = sqliteTable('treasury_adjustments', {
+  id: text('id').primaryKey(),
+  accountId: text('account_id').notNull().references(() => treasuryAccounts.id),
+  type: text('type', { enum: ['inflow', 'outflow'] }).notNull(), // 'inflow' (+) or 'outflow' (-)
+  amount: real('amount').notNull(),
+  currency: text('currency', { enum: ['USD', 'VES'] }).notNull(),
+  reason: text('reason').notNull(), // Motivo obligatorio del ajuste
+  notes: text('notes'),
+  adjustmentDate: integer('adjustment_date').notNull(),
+  createdBy: text('created_by').notNull().references(() => users.id, { onDelete: 'restrict' }),
+  createdAt: integer('created_at').notNull(),
+});
+
 
 // ==========================================
 // RELATIONS
@@ -409,6 +451,34 @@ export const deliveryPaymentsRelations = relations(deliveryPayments, ({ one }) =
 export const cashClosingsRelations = relations(cashClosings, ({ one }) => ({
   user: one(users, {
     fields: [cashClosings.closedBy],
+    references: [users.id],
+  }),
+}));
+
+export const treasuryTransfersRelations = relations(treasuryTransfers, ({ one }) => ({
+  fromAccount: one(treasuryAccounts, {
+    fields: [treasuryTransfers.fromAccountId],
+    references: [treasuryAccounts.id],
+    relationName: 'fromAccount',
+  }),
+  toAccount: one(treasuryAccounts, {
+    fields: [treasuryTransfers.toAccountId],
+    references: [treasuryAccounts.id],
+    relationName: 'toAccount',
+  }),
+  creator: one(users, {
+    fields: [treasuryTransfers.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const treasuryAdjustmentsRelations = relations(treasuryAdjustments, ({ one }) => ({
+  account: one(treasuryAccounts, {
+    fields: [treasuryAdjustments.accountId],
+    references: [treasuryAccounts.id],
+  }),
+  creator: one(users, {
+    fields: [treasuryAdjustments.createdBy],
     references: [users.id],
   }),
 }));
