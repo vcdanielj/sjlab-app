@@ -4,13 +4,14 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/Toast';
 import { PaymentModal } from '@/components/finances/PaymentModal';
+import { OrderPrintModal } from '@/components/orders/OrderPrintModal';
 import { formatCurrency, formatRelativeTime } from '@/lib/utils';
 import { getOrderColorOption, ORDER_COLOR_STANDARDS, ORDER_COLOR_OPTIONS, OrderColorStandard } from '@/lib/order-colors';
 import { Input } from '@/components/ui/Input';
@@ -218,6 +219,9 @@ export default function OrdersPage() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [payingOrder, setPayingOrder] = useState<any>(null);
+
+  // Print Modal
+  const [printingOrderId, setPrintingOrderId] = useState<string | null>(null);
 
   // Edit basic fields state
   const [isEditing, setIsEditing] = useState(false);
@@ -485,6 +489,19 @@ export default function OrdersPage() {
       addToast('Error al cargar detalle', 'error');
     }
   }
+
+  // Deep link: open the order drawer via ?order=<id> (used by the lab QR code)
+  const deepLinkHandled = useRef(false);
+  useEffect(() => {
+    if (deepLinkHandled.current) return;
+    deepLinkHandled.current = true;
+    const orderId = new URLSearchParams(window.location.search).get('order');
+    if (orderId) {
+      openDrawer(orderId);
+      window.history.replaceState(null, '', '/orders');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleSaveBasicFields(e: React.FormEvent) {
     e.preventDefault();
@@ -761,7 +778,7 @@ export default function OrdersPage() {
                 <th onClick={() => handleSort('status')}>
                   Estado <SortIcon active={sortBy === 'status'} order={sortOrder} />
                 </th>
-                {activeTab === 'active' && <th>Acciones</th>}
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -822,30 +839,35 @@ export default function OrdersPage() {
                         {order.status === 'active' ? 'Activo' : order.status === 'completed' ? 'Completado' : order.status === 'delivered' ? 'Entregado' : 'Cancelado'}
                       </span>
                     </td>
-                    {activeTab === 'active' && (
-                      <td onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.quickActions}>
-                          {!isLastStep(order) && (
-                            <button
-                              className={`${styles.quickBtn} ${styles.quickAdvance}`}
-                              onClick={(e) => handleQuickAdvance(e, order)}
-                              title={`Avanzar a: ${getNextStep(order)?.name || ''}`}
-                            >
-                              ▶ Avanzar
-                            </button>
-                          )}
-                          {isLastStep(order) && (
-                            <button
-                              className={`${styles.quickBtn} ${styles.quickFinish}`}
-                              onClick={(e) => handleQuickFinish(e, order)}
-                              title="Marcar como completado"
-                            >
-                              ✓ Finalizar
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    )}
+                    <td onClick={(e) => e.stopPropagation()}>
+                      <div className={styles.quickActions}>
+                        <button
+                          className={`${styles.quickBtn} ${styles.quickPrint}`}
+                          onClick={(e) => { e.stopPropagation(); setPrintingOrderId(order.id); }}
+                          title="Imprimir orden (Carta 50/50)"
+                        >
+                          🖨️ Imprimir
+                        </button>
+                        {activeTab === 'active' && !isLastStep(order) && (
+                          <button
+                            className={`${styles.quickBtn} ${styles.quickAdvance}`}
+                            onClick={(e) => handleQuickAdvance(e, order)}
+                            title={`Avanzar a: ${getNextStep(order)?.name || ''}`}
+                          >
+                            ▶ Avanzar
+                          </button>
+                        )}
+                        {activeTab === 'active' && isLastStep(order) && (
+                          <button
+                            className={`${styles.quickBtn} ${styles.quickFinish}`}
+                            onClick={(e) => handleQuickFinish(e, order)}
+                            title="Marcar como completado"
+                          >
+                            ✓ Finalizar
+                          </button>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -1051,8 +1073,8 @@ export default function OrdersPage() {
                       💵 Abonar
                     </Button>
                   )}
-                  <Button variant="secondary" onClick={() => window.open(`/api/pdf/order/${drawerOrder.order.id}`, '_blank')}>
-                    Imprimir Recibo
+                  <Button variant="secondary" onClick={() => setPrintingOrderId(drawerOrder.order.id)}>
+                    🖨️ Imprimir Orden
                   </Button>
                   <Button variant="secondary" onClick={() => setIsShareModalOpen(true)}>
                     🔗 Compartir
@@ -1314,6 +1336,13 @@ export default function OrdersPage() {
         }}
         onCancel={() => setConfirmDeleteOrderId(null)}
       />
+
+      {printingOrderId && (
+        <OrderPrintModal
+          orderId={printingOrderId}
+          onClose={() => setPrintingOrderId(null)}
+        />
+      )}
 
       {drawerOrder && (
         <PaymentModal

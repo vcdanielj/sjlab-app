@@ -471,6 +471,15 @@
   color: white;
 }
 
+.quickPrint {
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+}
+.quickPrint:hover {
+  background: var(--color-text);
+  color: white;
+}
+
 /* ---- Pagination ---- */
 .pagination {
   display: flex;

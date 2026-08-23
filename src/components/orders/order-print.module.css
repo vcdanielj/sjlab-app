@@ -1,0 +1,612 @@
+/* ============================================
+   SJ Lab — Order Print (Letter 50/50 duplex cut)
+   ============================================ */
+
+/* ---------- Page setup: Letter portrait, tight margins ---------- */
+@page {
+  size: letter portrait;
+  margin: 7mm;
+}
+
+/* ---------- Print isolation: only the sheet is printed ---------- */
+:global(.order-print-root) {
+  display: none;
+}
+
+@media print {
+  :global(body.order-printing) > :global(*:not(.order-print-root)) {
+    display: none !important;
+  }
+  :global(body.order-printing) > :global(.order-print-root) {
+    display: block !important;
+  }
+}
+
+/* ---------- Sheet (Letter content area ≈ 201.9mm x 265.4mm) ---------- */
+.sheet {
+  background: #ffffff;
+  color: #0f172a;
+  width: 202mm;
+  max-width: 100%;
+  margin: 0 auto;
+  font-family: var(--font-geist-sans), -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 8.5pt;
+  line-height: 1.35;
+}
+
+.sheet,
+.sheet * {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  box-sizing: border-box;
+}
+
+@media screen {
+  .sheet {
+    box-shadow: 0 10px 40px rgba(15, 23, 42, 0.18);
+    border: 1px solid #e2e8f0;
+  }
+}
+
+/* Each half: 127.5mm + 9mm cut line + 127.5mm = 264mm < 265.4mm usable */
+.half {
+  height: 127.5mm;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 3.5mm 4.5mm;
+  gap: 2mm;
+  page-break-inside: avoid;
+}
+
+/* ---------- Cut line ---------- */
+.cutLine {
+  height: 9mm;
+  display: flex;
+  align-items: center;
+  gap: 2.5mm;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.cutDash {
+  flex: 1;
+  border-top: 2px dashed #94a3b8;
+}
+
+.cutLabel {
+  display: flex;
+  align-items: center;
+  gap: 1.5mm;
+  font-size: 6.5pt;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ---------- Shared blocks ---------- */
+.halfHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 4mm;
+  padding-bottom: 2mm;
+  border-bottom: 2px solid #0f172a;
+  flex-shrink: 0;
+}
+
+.brandName {
+  font-size: 15pt;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #1d4ed8;
+  line-height: 1.1;
+}
+
+.brandSub {
+  font-size: 7pt;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.docType {
+  font-size: 8pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #0f172a;
+  margin-top: 1mm;
+}
+
+.orderBadge {
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 2mm;
+  padding: 1.5mm 4mm;
+  text-align: center;
+  min-width: 30mm;
+}
+
+.orderBadgeLabel {
+  display: block;
+  font-size: 6pt;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.orderBadgeNumber {
+  display: block;
+  font-size: 15pt;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.headerDates {
+  display: flex;
+  gap: 4mm;
+  margin-top: 1.5mm;
+  font-size: 7.5pt;
+}
+
+.headerDates span {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.headerDates strong {
+  color: #0f172a;
+}
+
+/* Info grid (identification) */
+.infoRow {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 2mm 4mm;
+  flex-shrink: 0;
+}
+
+.infoCell {
+  min-width: 0;
+}
+
+.infoLabel {
+  display: block;
+  font-size: 6pt;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.infoValue {
+  display: block;
+  font-size: 9pt;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Color / shade box */
+.colorBox {
+  display: flex;
+  align-items: center;
+  gap: 2.5mm;
+  background: #f8fafc;
+  border: 1.5px solid #0f172a;
+  border-radius: 1.5mm;
+  padding: 1.5mm 2.5mm;
+  min-width: 0;
+}
+
+.colorSwatch {
+  width: 7mm;
+  height: 7mm;
+  border-radius: 1mm;
+  border: 1px solid #94a3b8;
+  flex-shrink: 0;
+}
+
+.colorCode {
+  font-size: 11pt;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.colorName {
+  font-size: 6.5pt;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.colorEmpty {
+  font-size: 8pt;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+/* Two-column body */
+.bodyGrid {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 4mm;
+  flex: 1;
+  min-height: 0;
+}
+
+.sectionTitle {
+  font-size: 6.5pt;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #1d4ed8;
+  margin: 0 0 1mm 0;
+  padding-bottom: 0.5mm;
+  border-bottom: 1px solid #dbeafe;
+}
+
+.jobsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1mm;
+}
+
+.jobItem {
+  display: flex;
+  gap: 2mm;
+  font-size: 8pt;
+  min-width: 0;
+}
+
+.jobIndex {
+  font-weight: 700;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.jobBody {
+  min-width: 0;
+}
+
+.jobName {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.jobMeta {
+  display: block;
+  font-size: 7pt;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jobNotes {
+  display: block;
+  font-size: 7pt;
+  color: #92400e;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jobsMore {
+  font-size: 7pt;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* Clinical notes callout */
+.notesBox {
+  margin-top: 2mm;
+  background: #fffbeb;
+  border: 1px solid #f59e0b;
+  border-left: 3px solid #f59e0b;
+  border-radius: 1mm;
+  padding: 1.5mm 2.5mm;
+}
+
+.notesTitle {
+  font-size: 6.5pt;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #92400e;
+  margin: 0 0 0.5mm 0;
+}
+
+.notesText {
+  margin: 0;
+  font-size: 8pt;
+  color: #451a03;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Workflow checklist */
+.stepsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1mm;
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: 2mm;
+  font-size: 8pt;
+  padding: 0.75mm 1.5mm;
+  border-radius: 1mm;
+}
+
+.stepDone {
+  color: #15803d;
+}
+
+.stepCurrent {
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  font-weight: 700;
+}
+
+.stepCheckbox {
+  width: 3.5mm;
+  height: 3.5mm;
+  border: 1.5px solid #64748b;
+  border-radius: 0.75mm;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8pt;
+  color: #15803d;
+  font-weight: 800;
+}
+
+.stepDone .stepCheckbox {
+  border-color: #15803d;
+  background: #dcfce7;
+}
+
+.stepName {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stepInitials {
+  width: 12mm;
+  border-bottom: 1px solid #94a3b8;
+  flex-shrink: 0;
+}
+
+/* QR block */
+.qrBlock {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 2.5mm;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.5mm;
+  padding: 1.5mm 2mm;
+}
+
+.qrImage {
+  width: 17mm;
+  height: 17mm;
+  flex-shrink: 0;
+}
+
+.qrImage svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.qrText {
+  font-size: 6.5pt;
+  color: #475569;
+  line-height: 1.3;
+}
+
+.qrText strong {
+  display: block;
+  color: #0f172a;
+  font-size: 7pt;
+  margin-bottom: 0.5mm;
+}
+
+/* Client half: corporate header with contact */
+.contactLine {
+  font-size: 6.5pt;
+  color: #64748b;
+  margin-top: 0.5mm;
+}
+
+/* Financial box */
+.financeBox {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.5mm;
+  padding: 2mm 2.5mm;
+  display: flex;
+  flex-direction: column;
+  gap: 1mm;
+}
+
+.financeRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 8.5pt;
+}
+
+.financeRow span {
+  color: #475569;
+  font-weight: 600;
+}
+
+.financeRow strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.financeRow small {
+  display: block;
+  font-size: 6.5pt;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.balanceRow {
+  margin-top: 0.5mm;
+  padding: 1.5mm 2mm;
+  border-radius: 1mm;
+  background: #0f172a;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.balanceRow span {
+  font-size: 7pt;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #cbd5e1;
+}
+
+.balanceRow strong {
+  font-size: 12pt;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.balancePaid {
+  background: #15803d;
+}
+
+.balancePaid span {
+  color: #bbf7d0;
+}
+
+/* Terms */
+.termsText {
+  margin: 0;
+  font-size: 6pt;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* Half footer */
+.halfFooter {
+  flex-shrink: 0;
+  padding-top: 1.5mm;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  font-size: 6.5pt;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.signatureLine {
+  display: inline-block;
+  width: 35mm;
+  border-bottom: 1px solid #64748b;
+  margin-left: 2mm;
+}
+
+/* ---------- Preview modal (screen only) ---------- */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modalCard {
+  background: var(--color-bg-secondary, #f1f5f9);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 860px;
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.35);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.modalSubtitle {
+  margin: 2px 0 0 0;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.modalActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.modalBody {
+  padding: 18px;
+  overflow: auto;
+  flex: 1;
+}
+
+.modalStatus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.modalError {
+  color: #b91c1c;
+}

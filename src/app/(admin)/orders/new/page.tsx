@@ -13,6 +13,7 @@ import {
   ORDER_COLOR_STANDARDS,
   OrderColorStandard,
 } from '@/lib/order-colors';
+import { OrderPrintModal } from '@/components/orders/OrderPrintModal';
 import styles from './page.module.css';
 
 interface Client {
@@ -60,6 +61,7 @@ export default function CreateOrderPage() {
   const [color, setColor] = useState('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
+  const [createdOrder, setCreatedOrder] = useState<{ id: string; orderNumber: number } | null>(null);
   const [colorModalOpen, setColorModalOpen] = useState(false);
   const [activeColorStandard, setActiveColorStandard] = useState<OrderColorStandard>('vita-classical');
 
@@ -197,7 +199,8 @@ export default function CreateOrderPage() {
         return;
       }
       addToast(`Pedido #${data.data.orderNumber} creado`, 'success');
-      router.push('/orders');
+      // Offer immediate print of the work order / client receipt
+      setCreatedOrder({ id: data.data.id, orderNumber: data.data.orderNumber });
     } catch {
       addToast('Error al crear pedido', 'error');
     } finally {
@@ -464,6 +467,13 @@ export default function CreateOrderPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {createdOrder && (
+        <OrderPrintModal
+          orderId={createdOrder.id}
+          onClose={() => router.push('/orders')}
+        />
       )}
     </div>
   );
