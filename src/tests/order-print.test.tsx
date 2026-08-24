@@ -61,9 +61,6 @@ describe('OrderPrintDocument — Hoja Carta 50/50', () => {
   it('mapea los datos del detalle correctamente', () => {
     expect(data.orderNumber).toBe(1042);
     expect(data.jobs).toHaveLength(2);
-    // Solo pasos activos
-    expect(data.workflowSteps.map((s) => s.name)).not.toContain('Paso oculto');
-    expect(data.workflowSteps).toHaveLength(4);
   });
 
   it('renderiza ambas mitades y la línea de corte', () => {
@@ -81,13 +78,15 @@ describe('OrderPrintDocument — Hoja Carta 50/50', () => {
     expect(html).toContain('Reducir oclusal');
   });
 
-  it('genera QR de laboratorio y de cliente con URLs dinámicas', () => {
+  it('da protagonismo a los códigos QR (laboratorio y cliente)', () => {
     // react-qr-code renderiza SVG; las URLs se codifican en los paths del QR.
-    // Verificamos que ambos SVG estén presentes y los textos guía.
     const svgCount = (html.match(/<svg/g) || []).length;
     expect(svgCount).toBeGreaterThanOrEqual(3); // 2 QR + ícono de tijera
     expect(html).toContain('QR Laboratorio');
     expect(html).toContain('QR Cliente');
+    // Sin listado de procesos del workflow en la hoja impresa
+    expect(html).not.toContain('Control de producción');
+    expect(html).not.toContain('Diseño CAD');
   });
 
   it('muestra el estado de cuenta con saldo pendiente y conversión a Bs', () => {
@@ -96,13 +95,5 @@ describe('OrderPrintDocument — Hoja Carta 50/50', () => {
     expect(html).toContain('Saldo pendiente');
     expect(html).toContain('$100.00');
     expect(html).toContain('Bs.');
-  });
-
-  it('marca el checklist de producción con el paso actual', () => {
-    expect(html).toContain('Yesos');
-    expect(html).toContain('Diseño CAD');
-    expect(html).toContain('Control de Calidad');
-    // El paso previo al actual aparece marcado como completado
-    expect(html).toContain('✓');
   });
 });

@@ -29,11 +29,6 @@ export interface OrderPrintJob {
   exceptionReason: string | null;
 }
 
-export interface OrderPrintStep {
-  id: string;
-  name: string;
-}
-
 export interface OrderPrintData {
   id: string;
   orderNumber: number;
@@ -50,9 +45,7 @@ export interface OrderPrintData {
   clientClinic: string | null;
   clientPhone: string | null;
   productName: string;
-  currentStepId: string;
   jobs: OrderPrintJob[];
-  workflowSteps: OrderPrintStep[];
   bsRate: number | null;
 }
 
@@ -105,7 +98,6 @@ export function toOrderPrintData(detail: OrderDetailResponse, bsRate: number | n
     clientClinic: detail.order.clientClinic,
     clientPhone: detail.order.clientPhone,
     productName: detail.order.productName,
-    currentStepId: detail.order.currentStepId,
     jobs: detail.prosthesisJobs.map((job) => ({
       productName: job.productName,
       categoryName: job.categoryName,
@@ -114,9 +106,6 @@ export function toOrderPrintData(detail: OrderDetailResponse, bsRate: number | n
       isPatientException: job.isPatientException,
       exceptionReason: job.exceptionReason,
     })),
-    workflowSteps: detail.workflowSteps
-      .filter((step) => step.isActive)
-      .map((step) => ({ id: step.id, name: step.name })),
     bsRate,
   };
 }
@@ -200,7 +189,6 @@ export function OrderPrintDocument({ data, origin }: { data: OrderPrintData; ori
   const clientUrl = `${origin}/portal?orderId=${data.id}`;
   const balance = data.finalPriceUsd - data.amountPaidUsd;
   const isPaid = balance <= 0.005;
-  const currentStepIndex = data.workflowSteps.findIndex((s) => s.id === data.currentStepId);
   const contactParts = [
     LAB_INFO.whatsapp ? `WhatsApp: ${LAB_INFO.whatsapp}` : null,
     LAB_INFO.email || null,
@@ -262,30 +250,13 @@ export function OrderPrintDocument({ data, origin }: { data: OrderPrintData; ori
             )}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <h4 className={styles.sectionTitle}>Control de producción</h4>
-            <ul className={styles.stepsList}>
-              {data.workflowSteps.map((step, index) => {
-                const isDone = currentStepIndex >= 0 && index < currentStepIndex;
-                const isCurrent = index === currentStepIndex;
-                return (
-                  <li
-                    key={step.id}
-                    className={`${styles.stepItem} ${isDone ? styles.stepDone : ''} ${isCurrent ? styles.stepCurrent : ''}`}
-                  >
-                    <span className={styles.stepCheckbox}>{isDone ? '✓' : ''}</span>
-                    <span className={styles.stepName}>{step.name}</span>
-                    <span className={styles.stepInitials} />
-                  </li>
-                );
-              })}
-            </ul>
-            <div className={styles.qrBlock}>
-              <div className={styles.qrImage}>
+            <div className={styles.qrHero}>
+              <span className={styles.qrHeroTitle}>QR Laboratorio</span>
+              <div className={styles.qrHeroImage}>
                 <QRCode value={labUrl} bgColor="#FFFFFF" fgColor="#0F172A" />
               </div>
-              <p className={styles.qrText}>
-                <strong>QR Laboratorio</strong>
-                Escanear para abrir la orden en el sistema y actualizar el paso de trabajo.
+              <p className={styles.qrHeroText}>
+                Escanea para abrir la orden en el sistema y actualizar el paso de trabajo.
               </p>
             </div>
           </div>
