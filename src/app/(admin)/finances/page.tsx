@@ -185,7 +185,7 @@ export default function FinancesPage() {
           </svg>
           <input
             className={styles.searchInput}
-            placeholder="Buscar por odontólogo o clínica..."
+            placeholder="Buscar por odontólogo, clínica o teléfono..."
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
           />

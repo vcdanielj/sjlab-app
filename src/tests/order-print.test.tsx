@@ -63,8 +63,9 @@ describe('OrderPrintDocument — Hoja Carta 50/50', () => {
     expect(data.jobs).toHaveLength(2);
   });
 
-  it('renderiza ambas mitades y la línea de corte', () => {
-    expect(html).toContain('Copia Laboratorio');
+  it('renderiza la copia laboratorio duplicada (dos cuartos) y la copia cliente', () => {
+    const labCopies = (html.match(/Copia Laboratorio/g) || []).length;
+    expect(labCopies).toBe(2); // dos cuartos de hoja idénticos
     expect(html).toContain('Copia Cliente');
     expect(html).toContain('Línea de corte');
   });
@@ -81,8 +82,9 @@ describe('OrderPrintDocument — Hoja Carta 50/50', () => {
   it('da protagonismo a los códigos QR (laboratorio y cliente)', () => {
     // react-qr-code renderiza SVG; las URLs se codifican en los paths del QR.
     const svgCount = (html.match(/<svg/g) || []).length;
-    expect(svgCount).toBeGreaterThanOrEqual(3); // 2 QR + ícono de tijera
-    expect(html).toContain('QR Laboratorio');
+    expect(svgCount).toBeGreaterThanOrEqual(5); // 2 QR lab + 1 QR cliente + 2 íconos de tijera
+    const labQrCount = (html.match(/QR Laboratorio/g) || []).length;
+    expect(labQrCount).toBe(2); // un QR por cada cuarto de hoja
     expect(html).toContain('QR Cliente');
     // Sin listado de procesos del workflow en la hoja impresa
     expect(html).not.toContain('Control de producción');

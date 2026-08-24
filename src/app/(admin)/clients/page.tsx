@@ -145,7 +145,7 @@ export default function ClientsPage() {
           </svg>
           <input
             className={styles.searchInput}
-            placeholder="Buscar por nombre, clínica o email..."
+            placeholder="Buscar por nombre, clínica, email o teléfono..."
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
           />

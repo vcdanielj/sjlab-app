@@ -617,7 +617,7 @@ export default function ExpensesPage() {
           </svg>
           <input
             className={styles.searchInput}
-            placeholder="Buscar por descripción..."
+            placeholder="Buscar por descripción, notas, método o monto..."
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
           />

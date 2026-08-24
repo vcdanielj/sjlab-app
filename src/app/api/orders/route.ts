@@ -47,8 +47,16 @@ export async function GET(request: Request) {
     }
 
     if (search) {
+      const pattern = `%${search}%`;
       conditions.push(
-        sql`(${schema.orders.patientName} LIKE ${'%' + search + '%'} OR ${schema.users.name} LIKE ${'%' + search + '%'})`
+        sql`(${schema.orders.patientName} LIKE ${pattern}
+          OR CAST(${schema.orders.orderNumber} AS TEXT) LIKE ${pattern}
+          OR ${schema.users.name} LIKE ${pattern}
+          OR ${schema.users.clinicName} LIKE ${pattern}
+          OR ${schema.users.phone} LIKE ${pattern}
+          OR ${schema.products.name} LIKE ${pattern}
+          OR ${schema.orders.color} LIKE ${pattern}
+          OR ${schema.orders.notes} LIKE ${pattern})`
       );
     }
 

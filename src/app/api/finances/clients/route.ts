@@ -29,8 +29,9 @@ export async function GET(request: Request) {
     const conditions = [eq(schema.users.role, 'client')];
 
     if (search) {
+      const pattern = `%${search}%`;
       conditions.push(
-        sql`(${schema.users.name} LIKE ${'%' + search + '%'} OR ${schema.users.clinicName} LIKE ${'%' + search + '%'})`
+        sql`(${schema.users.name} LIKE ${pattern} OR ${schema.users.clinicName} LIKE ${pattern} OR ${schema.users.email} LIKE ${pattern} OR ${schema.users.phone} LIKE ${pattern} OR ${schema.users.taxId} LIKE ${pattern})`
       );
     }
 

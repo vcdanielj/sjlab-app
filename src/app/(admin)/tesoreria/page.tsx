@@ -251,11 +251,20 @@ export default function TesoreriaPage() {
   const filteredMovements = useMemo(() => {
     if (!movementSearchQuery.trim()) return movements;
     const q = movementSearchQuery.toLowerCase().trim();
+    const TYPE_LABELS: Record<string, string> = {
+      cobro: 'cobro ingreso',
+      gasto: 'gasto egreso',
+      transfer_in: 'transferencia entrada',
+      transfer_out: 'transferencia salida',
+    };
     return movements.filter(
       (m) =>
         m.description.toLowerCase().includes(q) ||
         m.accountName.toLowerCase().includes(q) ||
-        (m.reference && m.reference.toLowerCase().includes(q))
+        (m.reference && m.reference.toLowerCase().includes(q)) ||
+        (TYPE_LABELS[m.type] || m.type).includes(q) ||
+        m.currency.toLowerCase().includes(q) ||
+        String(m.amount).includes(q)
     );
   }, [movements, movementSearchQuery]);
 
@@ -644,7 +653,7 @@ export default function TesoreriaPage() {
               <input
                 type="text"
                 className={styles.searchInput}
-                placeholder="🔍 Buscar movimiento..."
+                placeholder="🔍 Buscar por descripción, cuenta, referencia, tipo o monto..."
                 value={movementSearchQuery}
                 onChange={(e) => setMovementSearchQuery(e.target.value)}
               />

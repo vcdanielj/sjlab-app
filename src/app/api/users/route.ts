@@ -25,7 +25,10 @@ export async function GET(request: Request) {
     if (search) {
       conditions.push(or(
         like(schema.users.name, `%${search}%`),
-        like(schema.users.email, `%${search}%`)
+        like(schema.users.email, `%${search}%`),
+        like(schema.users.phone, `%${search}%`),
+        like(schema.users.clinicName, `%${search}%`),
+        like(schema.users.taxId, `%${search}%`)
       ));
     }
     if (role) {

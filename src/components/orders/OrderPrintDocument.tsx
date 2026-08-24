@@ -155,8 +155,8 @@ function ColorBox({ color }: { color: string | null }) {
   );
 }
 
-function JobsList({ jobs }: { jobs: OrderPrintJob[] }) {
-  const visible = jobs.slice(0, MAX_VISIBLE_JOBS);
+function JobsList({ jobs, maxVisible = MAX_VISIBLE_JOBS }: { jobs: OrderPrintJob[]; maxVisible?: number }) {
+  const visible = jobs.slice(0, maxVisible);
   return (
     <ul className={styles.jobsList}>
       {visible.map((job, index) => (
@@ -175,10 +175,74 @@ function JobsList({ jobs }: { jobs: OrderPrintJob[] }) {
           </div>
         </li>
       ))}
-      {jobs.length > MAX_VISIBLE_JOBS && (
-        <li className={styles.jobsMore}>+ {jobs.length - MAX_VISIBLE_JOBS} trabajo(s) más (ver sistema)</li>
+      {jobs.length > maxVisible && (
+        <li className={styles.jobsMore}>+ {jobs.length - maxVisible} trabajo(s) más (ver sistema)</li>
       )}
     </ul>
+  );
+}
+
+// ---------- Lab quarter panel (rendered twice side by side) ----------
+
+function LabPanel({ data, labUrl }: { data: OrderPrintData; labUrl: string }) {
+  return (
+    <div className={styles.labPanel}>
+      <div className={styles.labHeader}>
+        <div>
+          <div className={styles.labBrand}>{LAB_INFO.name}</div>
+          <div className={styles.labDocType}>Orden de Trabajo · Copia Laboratorio</div>
+        </div>
+        <div className={styles.labBadge}>
+          <span className={styles.labBadgeLabel}>Pedido</span>
+          <span className={styles.labBadgeNumber}>#{data.orderNumber}</span>
+        </div>
+      </div>
+      <div className={styles.labDates}>
+        <span>Ingreso: <strong>{formatDate(data.createdAt)}</strong></span>
+        <span>Entrega: <strong>{deliveryLabel(data)}</strong></span>
+      </div>
+
+      <div className={styles.labField}>
+        <span className={styles.infoLabel}>Odontólogo / Clínica</span>
+        <span className={styles.labValue} title={`${data.clientName}${data.clientClinic ? ` · ${data.clientClinic}` : ''}`}>
+          {data.clientName}{data.clientClinic ? ` · ${data.clientClinic}` : ''}
+        </span>
+      </div>
+      <div className={styles.labFieldRow}>
+        <div className={styles.labField}>
+          <span className={styles.infoLabel}>Paciente</span>
+          <span className={styles.labValue} title={data.patientName}>{data.patientName || '—'}</span>
+        </div>
+        <div className={styles.labField}>
+          <span className={styles.infoLabel}>Teléfono</span>
+          <span className={styles.labValue}>{data.clientPhone || '—'}</span>
+        </div>
+      </div>
+      <ColorBox color={data.color} />
+
+      <h4 className={styles.sectionTitle}>Trabajos a realizar</h4>
+      <JobsList jobs={data.jobs} maxVisible={3} />
+      {data.notes && (
+        <div className={styles.notesBox}>
+          <p className={styles.notesTitle}>⚠ Notas clínicas</p>
+          <p className={styles.notesText} title={data.notes}>{data.notes}</p>
+        </div>
+      )}
+
+      <div className={styles.labQr}>
+        <div className={styles.labQrImage}>
+          <QRCode value={labUrl} bgColor="#FFFFFF" fgColor="#0F172A" />
+        </div>
+        <p className={styles.labQrText}>
+          <strong>QR Laboratorio</strong> · Escanea para abrir la orden y actualizar el paso de trabajo.
+        </p>
+      </div>
+
+      <div className={styles.labFooter}>
+        <span>Pedido #{data.orderNumber}</span>
+        <span>Técnico: <span className={styles.signatureLine} /></span>
+      </div>
+    </div>
   );
 }
 
@@ -197,75 +261,13 @@ export function OrderPrintDocument({ data, origin }: { data: OrderPrintData; ori
 
   return (
     <div className={styles.sheet}>
-      {/* ================= TOP HALF — LAB COPY ================= */}
-      <section className={styles.half}>
-        <div className={styles.halfHeader}>
-          <div>
-            <div className={styles.brandName}>{LAB_INFO.name}</div>
-            <div className={styles.brandSub}>{LAB_INFO.tagline}</div>
-            <div className={styles.docType}>Orden de Trabajo · Copia Laboratorio</div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <div className={styles.orderBadge}>
-              <span className={styles.orderBadgeLabel}>Pedido</span>
-              <span className={styles.orderBadgeNumber}>#{data.orderNumber}</span>
-            </div>
-            <div className={styles.headerDates}>
-              <div><span>Ingreso: </span><strong>{formatDate(data.createdAt)}</strong></div>
-              <div><span>Entrega: </span><strong>{deliveryLabel(data)}</strong></div>
-            </div>
-          </div>
+      {/* ============ TOP HALF — 2x LAB QUARTER-PAGE COPIES ============ */}
+      <section className={styles.halfTop}>
+        <LabPanel data={data} labUrl={labUrl} />
+        <div className={styles.cutLineV} aria-hidden="true">
+          <span className={styles.cutLabelV}><ScissorsIcon /></span>
         </div>
-
-        <div className={styles.infoRow}>
-          <div className={styles.infoCell}>
-            <span className={styles.infoLabel}>Odontólogo / Clínica</span>
-            <span className={styles.infoValue} title={`${data.clientName}${data.clientClinic ? ` · ${data.clientClinic}` : ''}`}>
-              {data.clientName}{data.clientClinic ? ` · ${data.clientClinic}` : ''}
-            </span>
-          </div>
-          <div className={styles.infoCell}>
-            <span className={styles.infoLabel}>Teléfono</span>
-            <span className={styles.infoValue}>{data.clientPhone || '—'}</span>
-          </div>
-          <div className={styles.infoCell}>
-            <span className={styles.infoLabel}>Paciente</span>
-            <span className={styles.infoValue} title={data.patientName}>{data.patientName || '—'}</span>
-          </div>
-          <div className={styles.infoCell}>
-            <span className={styles.infoLabel}>Color / Guía de tono</span>
-            <ColorBox color={data.color} />
-          </div>
-        </div>
-
-        <div className={styles.bodyGrid}>
-          <div>
-            <h4 className={styles.sectionTitle}>Trabajos a realizar</h4>
-            <JobsList jobs={data.jobs} />
-            {data.notes && (
-              <div className={styles.notesBox}>
-                <p className={styles.notesTitle}>⚠ Notas clínicas / indicaciones</p>
-                <p className={styles.notesText} title={data.notes}>{data.notes}</p>
-              </div>
-            )}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <div className={styles.qrHero}>
-              <span className={styles.qrHeroTitle}>QR Laboratorio</span>
-              <div className={styles.qrHeroImage}>
-                <QRCode value={labUrl} bgColor="#FFFFFF" fgColor="#0F172A" />
-              </div>
-              <p className={styles.qrHeroText}>
-                Escanea para abrir la orden en el sistema y actualizar el paso de trabajo.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.halfFooter}>
-          <span>{LAB_INFO.name} · Copia Laboratorio · Pedido #{data.orderNumber}</span>
-          <span>Técnico responsable: <span className={styles.signatureLine} /></span>
-        </div>
+        <LabPanel data={data} labUrl={labUrl} />
       </section>
 
       {/* ================= CUT LINE ================= */}

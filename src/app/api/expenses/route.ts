@@ -2,7 +2,7 @@
 // SJ Lab — Expenses API (CRUD) - Enhanced
 // ============================================
 
-import { desc, asc, like, and, gte, lte, sql, eq } from 'drizzle-orm';
+import { desc, asc, and, gte, lte, sql, eq } from 'drizzle-orm';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { getDb } from '@/db';
 import * as schema from '@/db/schema';
@@ -42,7 +42,13 @@ export async function GET(request: Request) {
 
     const baseConditions = [];
     if (search) {
-      baseConditions.push(like(schema.expenses.description, `%${search}%`));
+      const pattern = `%${search}%`;
+      baseConditions.push(
+        sql`(${schema.expenses.description} LIKE ${pattern}
+          OR ${schema.expenses.notes} LIKE ${pattern}
+          OR ${schema.expenses.paymentMethod} LIKE ${pattern}
+          OR CAST(${schema.expenses.amountUsd} AS TEXT) LIKE ${pattern})`
+      );
     }
     if (categoryId) {
       baseConditions.push(eq(schema.expenses.categoryId, categoryId));

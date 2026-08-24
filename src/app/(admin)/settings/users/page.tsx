@@ -191,7 +191,7 @@ export default function UsersPage() {
           </svg>
           <input
             className={styles.searchInput}
-            placeholder="Buscar por nombre o email..."
+            placeholder="Buscar por nombre, email o teléfono..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />

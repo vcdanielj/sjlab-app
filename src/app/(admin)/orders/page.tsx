@@ -666,7 +666,7 @@ export default function OrdersPage() {
           </svg>
           <input
             className={styles.searchInput}
-            placeholder="Buscar paciente u odontólogo..."
+            placeholder="Buscar N°, paciente, odontólogo, producto..."
             value={searchText}
             onChange={(e) => { handleSearchChange(e.target.value); setSearchOpen(true); setSearchHighlight(-1); }}
             onFocus={() => setSearchOpen(true)}

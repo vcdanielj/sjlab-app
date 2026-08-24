@@ -337,50 +337,197 @@
   overflow: hidden;
 }
 
-/* Hero QR block (lab half, replaces the workflow checklist) */
-.qrHero {
-  flex: 1;
+/* ---------- Top half: two quarter-page lab panels ---------- */
+.halfTop {
+  height: 127.5mm;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2mm;
-  background: #f8fafc;
-  border: 2px solid #0f172a;
-  border-radius: 2mm;
-  padding: 3mm 4mm;
-  text-align: center;
+  overflow: hidden;
+  page-break-inside: avoid;
 }
 
-.qrHeroTitle {
-  font-size: 8.5pt;
+.labPanel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2mm;
+  padding: 3mm 3.5mm;
+  overflow: hidden;
+  font-size: 7.5pt;
+}
+
+.cutLineV {
+  width: 6mm;
+  flex-shrink: 0;
+  border-left: 2px dashed #94a3b8;
+  margin: 2mm 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+}
+
+.cutLabelV {
+  transform: rotate(90deg);
+  display: inline-flex;
+}
+
+.labHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2mm;
+  padding-bottom: 1.5mm;
+  border-bottom: 1.5px solid #0f172a;
+  flex-shrink: 0;
+}
+
+.labBrand {
+  font-size: 11pt;
   font-weight: 800;
-  letter-spacing: 0.14em;
+  letter-spacing: -0.02em;
+  color: #1d4ed8;
+  line-height: 1.1;
+}
+
+.labDocType {
+  font-size: 5.5pt;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #0f172a;
+  margin-top: 0.5mm;
+}
+
+.labBadge {
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 1.5mm;
+  padding: 1mm 2.5mm;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.labBadgeLabel {
+  display: block;
+  font-size: 5pt;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.labBadgeNumber {
+  display: block;
+  font-size: 11pt;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.labDates {
+  display: flex;
+  justify-content: space-between;
+  gap: 2mm;
+  font-size: 6.5pt;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.labDates strong {
   color: #0f172a;
 }
 
-.qrHeroImage {
-  width: 34mm;
-  height: 34mm;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 1.5mm;
-  padding: 1.5mm;
+.labField {
+  min-width: 0;
+  flex-shrink: 0;
 }
 
-.qrHeroImage svg {
+.labFieldRow {
+  display: flex;
+  gap: 3mm;
+}
+
+.labFieldRow .labField {
+  flex: 1;
+}
+
+.labValue {
+  display: block;
+  font-size: 8pt;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.labPanel .colorBox {
+  padding: 1mm 2mm;
+}
+
+.labPanel .colorSwatch {
+  width: 5mm;
+  height: 5mm;
+}
+
+.labPanel .colorCode {
+  font-size: 9pt;
+}
+
+.labPanel .notesText {
+  -webkit-line-clamp: 2;
+}
+
+.labQr {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1mm;
+  padding: 1.5mm 2mm;
+  background: #f8fafc;
+  border: 1.5px solid #0f172a;
+  border-radius: 1.5mm;
+}
+
+.labQrImage {
+  width: 25mm;
+  height: 25mm;
+  background: #ffffff;
+  padding: 1mm;
+  border: 1px solid #cbd5e1;
+  border-radius: 1mm;
+  flex-shrink: 0;
+}
+
+.labQrImage svg {
   width: 100%;
   height: 100%;
   display: block;
 }
 
-.qrHeroText {
+.labQrText {
   margin: 0;
-  font-size: 7pt;
+  font-size: 6pt;
   color: #475569;
-  line-height: 1.4;
-  max-width: 52mm;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.labFooter {
+  flex-shrink: 0;
+  padding-top: 1mm;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 6.5pt;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.labFooter .signatureLine {
+  width: 18mm;
 }
 
 /* QR block */
