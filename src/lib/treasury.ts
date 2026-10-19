@@ -75,6 +75,17 @@ export async function calculateTreasuryBalances(db: any, startDate: number = AUG
       )
     );
 
+  // 2b. Fetch pending Unidentified Payments (por conciliar) since startDate
+  const unidentified = await db
+    .select()
+    .from(schema.unidentifiedPayments)
+    .where(
+      and(
+        eq(schema.unidentifiedPayments.status, 'pending'),
+        gte(schema.unidentifiedPayments.paymentDate, startDate)
+      )
+    );
+
   // 3. Fetch Expenses since startDate
   const expenses = await db
     .select()
@@ -109,6 +120,7 @@ export async function calculateTreasuryBalances(db: any, startDate: number = AUG
       transfersOut: 0,
       adjustmentsIn: 0,
       adjustmentsOut: 0,
+      pendingReconciliation: 0,
       currentBalance: Number(acc.initialBalance) || 0,
     };
   }
@@ -119,6 +131,16 @@ export async function calculateTreasuryBalances(db: any, startDate: number = AUG
     const amt = Number(p.amount) || 0;
     if (result[accId]) {
       result[accId].inflows += amt;
+    }
+  }
+
+  // Process Unidentified Payments (Inflows pending reconciliation)
+  for (const u of unidentified) {
+    const accId = mapPaymentMethodToAccount(u.paymentMethod, u.currency);
+    const amt = Number(u.amount) || 0;
+    if (result[accId]) {
+      result[accId].inflows += amt;
+      result[accId].pendingReconciliation += amt;
     }
   }
 
@@ -168,6 +190,7 @@ export async function calculateTreasuryBalances(db: any, startDate: number = AUG
     b.transfersOut = Number(b.transfersOut.toFixed(2));
     b.adjustmentsIn = Number(b.adjustmentsIn.toFixed(2));
     b.adjustmentsOut = Number(b.adjustmentsOut.toFixed(2));
+    b.pendingReconciliation = Number(b.pendingReconciliation.toFixed(2));
 
     const totalNet =
       b.initialBalance +
@@ -207,7 +230,7 @@ export async function getTreasuryMovementsStatement(
   const rawEvents: Array<{
     id: string;
     date: number;
-    type: 'cobro' | 'gasto' | 'transfer_in' | 'transfer_out' | 'adjustment_in' | 'adjustment_out';
+    type: 'cobro' | 'por_conciliar' | 'gasto' | 'transfer_in' | 'transfer_out' | 'adjustment_in' | 'adjustment_out';
     accountId: string;
     description: string;
     reference?: string | null;
@@ -245,6 +268,31 @@ export async function getTreasuryMovementsStatement(
       description: `Cobro de cliente: ${p.clientName || 'Cliente'} (${p.method})`,
       reference: p.ref,
       amount: Number(p.amount) || 0,
+    });
+  }
+
+  // 1b. Unidentified Payments (por conciliar)
+  const unidentified = await db
+    .select()
+    .from(schema.unidentifiedPayments)
+    .where(
+      and(
+        eq(schema.unidentifiedPayments.status, 'pending'),
+        gte(schema.unidentifiedPayments.paymentDate, fromDate),
+        toDate ? lte(schema.unidentifiedPayments.paymentDate, toDate) : undefined
+      )
+    );
+
+  for (const u of unidentified) {
+    const accId = mapPaymentMethodToAccount(u.paymentMethod, u.currency);
+    rawEvents.push({
+      id: u.id,
+      date: u.paymentDate,
+      type: 'por_conciliar',
+      accountId: accId,
+      description: `Ingreso por conciliar (${u.paymentMethod})${u.notes ? ` · ${u.notes}` : ''}`,
+      reference: u.reference,
+      amount: Number(u.amount) || 0,
     });
   }
 

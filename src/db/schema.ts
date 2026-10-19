@@ -290,6 +290,25 @@ export const treasuryAdjustments = sqliteTable('treasury_adjustments', {
   createdAt: integer('created_at').notNull(),
 });
 
+// ---------- Unidentified Payments (Pagos por Conciliar) ----------
+// Ingresos recibidos sin cliente identificado. Mientras están 'pending' suman al saldo
+// de tesorería; al conciliarse se convierten en un pago real del cliente (payments).
+export const unidentifiedPayments = sqliteTable('unidentified_payments', {
+  id: text('id').primaryKey(),
+  currency: text('currency', { enum: ['USD', 'VES'] }).notNull(),
+  amount: real('amount_original').notNull(),
+  paymentMethod: text('payment_method').notNull(),
+  reference: text('reference'),
+  paymentDate: integer('payment_date').notNull(),
+  notes: text('notes'),
+  status: text('status', { enum: ['pending', 'reconciled', 'voided'] }).notNull().default('pending'),
+  reconciledPaymentId: text('reconciled_payment_id').references(() => payments.id, { onDelete: 'set null' }),
+  reconciledAt: integer('reconciled_at'),
+  voidedAt: integer('voided_at'),
+  createdBy: text('created_by').notNull().references(() => users.id, { onDelete: 'restrict' }),
+  createdAt: integer('created_at').notNull(),
+});
+
 
 // ==========================================
 // RELATIONS

@@ -4,7 +4,8 @@
 
 SaaS privado para laboratorio dental (SJ Lab). Gestión de producción con Kanban dinámico, finanzas bimonetarias (USD/VES) con cuenta corriente FIFO, y portal de transparencia para odontólogos.
 
-**Dominio:** `sjlabdental.com`
+**Dominio:** `app.sjlabdental.com` (el dominio raíz `sjlabdental.com` no apunta al worker)
+**Ubicación del repo:** `~/dev/sjlab-app`. No trabajar desde la antigua copia en iCloud Drive: allí el build tardaba más de 15 min.
 **PRD completo:** `PRD.md` (siempre consultarlo antes de implementar cualquier módulo).
 
 ---
@@ -14,7 +15,7 @@ SaaS privado para laboratorio dental (SJ Lab). Gestión de producción con Kanba
 | Capa | Tecnología |
 |---|---|
 | Framework | Next.js 16 (App Router) — Edge Runtime obligatorio |
-| Hosting | Cloudflare Pages (`@opennextjs/cloudflare`) |
+| Hosting | Cloudflare Workers (`@opennextjs/cloudflare`), worker `sjlab-app` |
 | Base de Datos | Cloudflare D1 (SQLite en el Edge) |
 | ORM | Drizzle ORM (adaptador D1) |
 | Almacenamiento | Cloudflare R2 (PDFs) |
@@ -319,8 +320,9 @@ La lógica de cuenta corriente FIFO es la pieza financiera más crítica del sis
 ```bash
 # Development
 npm run dev                  # Local dev server (next dev)
-npm run build                # Build para Cloudflare Pages
+npm run build                # next build (sin empaquetar para Cloudflare)
 npm run preview              # Preview local del build de Cloudflare
+npm run deploy               # Build OpenNext + wrangler deploy a producción
 
 # Database
 npm run db:generate          # Generar migraciones con drizzle-kit
@@ -330,9 +332,21 @@ npm run db:seed              # Poblar datos semilla
 npm run db:studio            # Abrir Drizzle Studio (inspeccionar DB)
 
 # Cloudflare
+npx wrangler whoami          # Verificar cuenta (debe ser vcdanielj@gmail.com)
 npx wrangler d1 list         # Listar bases D1
-npx wrangler pages deploy    # Deploy a Cloudflare Pages
+npx wrangler d1 migrations list sjlab-prod --remote   # Migraciones pendientes en producción
 ```
+
+### Deploy a producción
+
+1. `npx wrangler whoami` → debe mostrar la cuenta `vcdanielj@gmail.com` (`053d6d9140fd678f8d5e1843dffa6298`). En esta máquina hay otras cuentas de Cloudflare (Arizon); si aparece otra, ejecutar `npx wrangler login`.
+2. Si hay migraciones nuevas: `npm run db:migrate:prod`. Las migraciones de `src/db/migrations/` se escriben a mano con `CREATE TABLE IF NOT EXISTS` (el journal de drizzle-kit está desactualizado desde la 0009).
+3. `npm run deploy`.
+4. Verificar: `https://app.sjlabdental.com` debe responder 200 y `/api/...` sin sesión debe redirigir (307), no dar 500.
+
+`wrangler.toml` debe mantener `main = "worker-entry.js"` y `[triggers] crons = ["0 8 * * *"]`: `worker-entry.js` envuelve el worker de OpenNext y añade el handler `scheduled` del envío automático de estados de cuenta. Si se apunta `main` a `.open-next/worker.js`, el cron deja de funcionar.
+
+La D1 local (`npm run db:migrate`) nunca se gestionó con migraciones: aparecen todas pendientes desde la 0000. No aplicarlas sin revisar.
 
 ---
 

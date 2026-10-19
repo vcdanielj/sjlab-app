@@ -5,7 +5,7 @@
 
 import { eq, and, desc, inArray } from 'drizzle-orm';
 import { getCloudflareContext } from '@opennextjs/cloudflare';
-import { getDb } from '@/db';
+import { getDb, type Database } from '@/db';
 import * as schema from '@/db/schema';
 import { generateId, now } from '@/lib/utils';
 import { getSession } from '@/lib/session';
@@ -59,25 +59,49 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       clientId,
-      currency,
-      amount,
+      unidentifiedPaymentId,
       appliedExchangeRateType,
       exchangeRate,
-      paymentMethod,
-      reference,
-      paymentDate,
       orderAllocations,
     } = body as {
       clientId?: string;
-      currency?: 'USD' | 'VES';
-      amount?: number;
+      unidentifiedPaymentId?: string;
       appliedExchangeRateType?: 'USD_PARALLEL' | 'USD_BCV' | 'EUR_BCV' | 'MANUAL';
       exchangeRate?: number;
+      orderAllocations?: { orderId: string; amountUsd: number }[];
+    };
+
+    const { env } = await getCloudflareContext({ async: true });
+    const db = getDb(env.DB);
+    const kv = (env as { RATES_KV?: RATES_KV_BINDING }).RATES_KV;
+
+    // Conciliación: los datos del ingreso salen del pago por conciliar, no del cliente HTTP
+    let paymentSource: {
+      currency?: 'USD' | 'VES';
+      amount?: number;
       paymentMethod?: string;
       reference?: string;
       paymentDate?: number;
-      orderAllocations?: { orderId: string; amountUsd: number }[];
-    };
+    } = body;
+    if (unidentifiedPaymentId) {
+      const unidentified = await db.query.unidentifiedPayments.findFirst({
+        where: eq(schema.unidentifiedPayments.id, unidentifiedPaymentId),
+      });
+      if (!unidentified) {
+        return Response.json({ error: 'Pago por conciliar no encontrado' }, { status: 404 });
+      }
+      if (unidentified.status !== 'pending') {
+        return Response.json({ error: 'Este pago por conciliar ya fue procesado' }, { status: 409 });
+      }
+      paymentSource = {
+        currency: unidentified.currency,
+        amount: unidentified.amount,
+        paymentMethod: unidentified.paymentMethod,
+        reference: unidentified.reference ?? undefined,
+        paymentDate: unidentified.paymentDate,
+      };
+    }
+    const { currency, amount, paymentMethod, reference, paymentDate } = paymentSource;
 
     // Validations
     if (!clientId) return Response.json({ error: 'El cliente es requerido' }, { status: 400 });
@@ -96,10 +120,6 @@ export async function POST(request: Request) {
     if (currency === 'VES' && !reference?.trim()) {
       return Response.json({ error: 'La referencia es obligatoria para pagos en VES' }, { status: 400 });
     }
-
-    const { env } = await getCloudflareContext({ async: true });
-    const db = getDb(env.DB);
-    const kv = (env as { RATES_KV?: RATES_KV_BINDING }).RATES_KV;
 
     // Verify client exists
     const client = await db.query.users.findFirst({
@@ -212,6 +232,11 @@ export async function POST(request: Request) {
         } else {
           allocations = await applyPayment(tx, clientId, amountUsd, paymentId);
         }
+
+        // 3. Close the unidentified payment being reconciled
+        if (unidentifiedPaymentId) {
+          await markUnidentifiedReconciled(tx, unidentifiedPaymentId, paymentId, timestamp);
+        }
       });
     } catch (txError) {
       console.error('Payment transaction failed, falling back to sequential:', txError);
@@ -240,6 +265,11 @@ export async function POST(request: Request) {
       } else {
         allocations = await applyPayment(db, clientId, amountUsd, paymentId);
       }
+
+      // 3. Close the unidentified payment being reconciled
+      if (unidentifiedPaymentId) {
+        await markUnidentifiedReconciled(db, unidentifiedPaymentId, paymentId, timestamp);
+      }
     }
 
     return Response.json(
@@ -259,3 +289,19 @@ export async function POST(request: Request) {
   }
 }
 
+async function markUnidentifiedReconciled(
+  db: Pick<Database, 'update'>,
+  unidentifiedPaymentId: string,
+  paymentId: string,
+  timestamp: number
+) {
+  await db
+    .update(schema.unidentifiedPayments)
+    .set({ status: 'reconciled', reconciledPaymentId: paymentId, reconciledAt: timestamp })
+    .where(
+      and(
+        eq(schema.unidentifiedPayments.id, unidentifiedPaymentId),
+        eq(schema.unidentifiedPayments.status, 'pending')
+      )
+    );
+}

@@ -1,6 +1,6 @@
 # Guía de Despliegue a Producción (SJ Lab)
 
-Este documento describe el procedimiento paso a paso para actualizar la aplicación en producción, incluyendo la base de datos (Cloudflare D1) y el frontend/backend (Cloudflare Pages con OpenNext).
+Este documento describe el procedimiento paso a paso para actualizar la aplicación en producción, incluyendo la base de datos (Cloudflare D1) y el frontend/backend (Cloudflare Workers con OpenNext).
 
 ## Requisitos Previos
 
@@ -45,7 +45,7 @@ npm run db:migrate:prod
 
 ## 3. Despliegue de la Aplicación
 
-Una vez que la base de datos esté actualizada (o si solo hiciste cambios de código/interfaz), debes compilar y subir la aplicación a Cloudflare Pages.
+Una vez que la base de datos esté actualizada (o si solo hiciste cambios de código/interfaz), debes compilar y subir la aplicación a Cloudflare Workers.
 
 Ejecuta el siguiente comando en la raíz del proyecto:
 ```bash
@@ -57,7 +57,7 @@ npm run deploy
 2. `opennextjs-cloudflare build`: Compila el proyecto Next.js y lo adapta para ejecutarse en el entorno de Cloudflare Workers (Edge).
 3. `wrangler deploy`: Sube los archivos estáticos y el worker resultante a la red global de Cloudflare.
 
-Al finalizar, la terminal te mostrará la URL de producción (ej. `https://sjlab-app.vcdanielj.workers.dev`).
+Al finalizar, la terminal te mostrará la URL de producción (`https://sjlab-app.vcdanielj.workers.dev`). El dominio de producción es `https://app.sjlabdental.com`.
 
 ---
 

@@ -51,6 +51,18 @@ export async function GET(request: Request) {
         )
       );
 
+    // Ingresos por conciliar (sin cliente) también entran a caja
+    const pendingUnidentified = await db
+      .select()
+      .from(schema.unidentifiedPayments)
+      .where(
+        and(
+          eq(schema.unidentifiedPayments.status, 'pending'),
+          gt(schema.unidentifiedPayments.paymentDate, periodStart),
+          lte(schema.unidentifiedPayments.paymentDate, periodEnd)
+        )
+      );
+
     const activeExpenses = await db
       .select()
       .from(schema.expenses)
@@ -71,7 +83,7 @@ export async function GET(request: Request) {
     let efectivoInflows = 0; let efectivoOutflows = 0;
     let bolivaresInflows = 0; let bolivaresOutflows = 0;
 
-    for (const p of activePayments) {
+    for (const p of [...activePayments, ...pendingUnidentified]) {
       const amt = Number(p.amount) || 0;
       if (p.currency === 'VES') {
         bolivaresInflows += amt;

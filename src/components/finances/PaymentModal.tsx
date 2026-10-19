@@ -13,6 +13,7 @@ import { useToast } from '@/components/ui/Toast';
 import { formatCurrency } from '@/lib/utils';
 import { PAYMENT_METHODS_BY_CURRENCY } from '@/lib/constants';
 import { fetchRatesWithCache } from '@/lib/rates-client';
+import type { UnidentifiedPayment } from '@/types';
 import styles from './payment-modal.module.css';
 
 interface AllocationPreview {
@@ -46,6 +47,8 @@ interface PaymentModalProps {
   targetOrderId?: string;
   targetOrderNumber?: number;
   targetOrderRemainingUsd?: number;
+  /** Conciliación: precarga y bloquea los datos del ingreso por conciliar */
+  unidentifiedPayment?: UnidentifiedPayment;
 }
 
 export function PaymentModal({
@@ -57,7 +60,9 @@ export function PaymentModal({
   targetOrderId,
   targetOrderNumber,
   targetOrderRemainingUsd,
+  unidentifiedPayment,
 }: PaymentModalProps) {
+  const isReconciling = !!unidentifiedPayment;
   const { addToast } = useToast();
 
   const [currency, setCurrency] = useState<'USD' | 'VES'>('USD');
@@ -84,7 +89,7 @@ export function PaymentModal({
   // Set today's date on open (using Caracas timezone to prevent date desyncs)
   useEffect(() => {
     if (isOpen) {
-      const getCaracasDateString = () => {
+      const getCaracasDateString = (date: Date) => {
         try {
           const formatter = new Intl.DateTimeFormat('en-CA', {
             timeZone: 'America/Caracas',
@@ -92,21 +97,29 @@ export function PaymentModal({
             month: '2-digit',
             day: '2-digit'
           });
-          return formatter.format(new Date());
+          return formatter.format(date);
         } catch {
-          return new Date().toISOString().split('T')[0];
+          return date.toISOString().split('T')[0];
         }
       };
 
       const timer = setTimeout(() => {
-        setPaymentDate(getCaracasDateString());
-        // Reset fields
-        setCurrency('USD');
-        setAmount('');
+        // Reset fields (or prefill from the unidentified payment being reconciled)
+        if (unidentifiedPayment) {
+          setPaymentDate(getCaracasDateString(new Date(unidentifiedPayment.paymentDate * 1000)));
+          setCurrency(unidentifiedPayment.currency);
+          setAmount(String(unidentifiedPayment.amount));
+          setPaymentMethod(unidentifiedPayment.paymentMethod);
+          setReference(unidentifiedPayment.reference || '');
+        } else {
+          setPaymentDate(getCaracasDateString(new Date()));
+          setCurrency('USD');
+          setAmount('');
+          setPaymentMethod('');
+          setReference('');
+        }
         setExchangeRate('');
         setAppliedExchangeRateType('USD_PARALLEL');
-        setPaymentMethod('');
-        setReference('');
         setPreview(null);
         setDistMode('fifo');
         setManualAllocations({});
@@ -126,7 +139,7 @@ export function PaymentModal({
       }, 0);
       return () => clearTimeout(timer);
     }
-  }, [isOpen, clientId, targetOrderId]);
+  }, [isOpen, clientId, targetOrderId, unidentifiedPayment]);
 
   // Fetch exchange rates for the selected date
   useEffect(() => {
@@ -333,6 +346,7 @@ export function PaymentModal({
         reference: reference.trim() || undefined,
         paymentDate: parsedDate,
         orderAllocations: allocationsPayload,
+        unidentifiedPaymentId: unidentifiedPayment?.id,
       };
 
       const res = await fetch('/api/payments', {
@@ -345,7 +359,9 @@ export function PaymentModal({
 
       if (res.ok) {
         addToast(
-          targetOrderId
+          isReconciling
+            ? 'Pago conciliado y asignado al cliente con éxito'
+            : targetOrderId
             ? 'Pago registrado y aplicado al pedido con éxito'
             : 'Pago registrado y distribuido con éxito',
           'success'
@@ -369,7 +385,7 @@ export function PaymentModal({
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        title="Registrar Pago / Cobro"
+        title={isReconciling ? 'Conciliar Pago por Identificar' : 'Registrar Pago / Cobro'}
         size="lg"
         footer={
           <div className={styles.footerButtons}>
@@ -377,15 +393,21 @@ export function PaymentModal({
               Cancelar
             </Button>
             <Button size="md" onClick={handleSave} loading={loading}>
-              Confirmar Pago
+              {isReconciling ? 'Confirmar Conciliación' : 'Confirmar Pago'}
             </Button>
           </div>
         }
       >
         <div className={styles.modalBody}>
           <p className={styles.intro}>
-            Registrando cobro para: <strong>{clientName}</strong>
+            {isReconciling ? 'Asignando ingreso por conciliar a: ' : 'Registrando cobro para: '}
+            <strong>{clientName}</strong>
           </p>
+          {isReconciling && (
+            <p className={styles.intro}>
+              Moneda, monto, método, referencia y fecha provienen del ingreso registrado y no se pueden modificar.
+            </p>
+          )}
 
           {/* Currency Switcher */}
           <div className={styles.row}>
@@ -396,6 +418,7 @@ export function PaymentModal({
                   type="button"
                   className={`${styles.tab} ${currency === 'USD' ? styles.tabActive : ''}`}
                   onClick={() => handleCurrencyChange('USD')}
+                  disabled={isReconciling}
                 >
                   Dólares (USD $)
                 </button>
@@ -403,6 +426,7 @@ export function PaymentModal({
                   type="button"
                   className={`${styles.tab} ${currency === 'VES' ? styles.tabActive : ''}`}
                   onClick={() => handleCurrencyChange('VES')}
+                  disabled={isReconciling}
                 >
                   Bolívares (VES Bs.)
                 </button>
@@ -419,6 +443,7 @@ export function PaymentModal({
               placeholder="0.00"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
+              disabled={isReconciling}
             />
 
             <Select
@@ -486,6 +511,7 @@ export function PaymentModal({
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
               placeholder="Seleccionar..."
+              disabled={isReconciling}
             >
               {methods.map((m) => (
                 <option key={m} value={m}>
@@ -500,6 +526,7 @@ export function PaymentModal({
               placeholder={currency === 'VES' ? 'Obligatorio (ej. 12345)' : 'Opcional'}
               value={reference}
               onChange={(e) => setReference(e.target.value)}
+              disabled={isReconciling}
             />
 
             <Input
@@ -507,6 +534,7 @@ export function PaymentModal({
               type="date"
               value={paymentDate}
               onChange={(e) => setPaymentDate(e.target.value)}
+              disabled={isReconciling}
             />
           </div>
 

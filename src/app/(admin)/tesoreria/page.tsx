@@ -6,14 +6,18 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/Button';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/Toast';
+import { PaymentModal } from '@/components/finances/PaymentModal';
 import { formatCurrency, formatDate, formatBs } from '@/lib/utils';
+import { PAYMENT_METHODS_BY_CURRENCY } from '@/lib/constants';
 import {
   TreasuryAccountBalance,
   TreasuryTransfer,
   TreasuryAdjustment,
   AccountMovement,
   CashClosing,
+  UnidentifiedPayment,
 } from '@/types';
 import styles from './page.module.css';
 
@@ -27,11 +31,31 @@ const REASON_PRESETS = [
   'Otro motivo',
 ];
 
+type TesoreriaTab = 'movements' | 'unidentified' | 'transfers' | 'adjustments' | 'closings';
+
+interface ClientOption {
+  id: string;
+  name: string;
+  clinicName?: string | null;
+}
+
+function getTodayCaracas() {
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Caracas',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(new Date());
+  } catch {
+    return new Date().toISOString().split('T')[0];
+  }
+}
+
 export default function TesoreriaPage() {
   const { addToast } = useToast();
 
-  // Active tab state: 'movements' | 'transfers' | 'adjustments' | 'closings'
-  const [activeTab, setActiveTab] = useState<'movements' | 'transfers' | 'adjustments' | 'closings'>('movements');
+  const [activeTab, setActiveTab] = useState<TesoreriaTab>('movements');
 
   // Loading states
   const [loadingBalances, setLoadingBalances] = useState(true);
@@ -39,6 +63,7 @@ export default function TesoreriaPage() {
   const [loadingTransfers, setLoadingTransfers] = useState(false);
   const [loadingAdjustments, setLoadingAdjustments] = useState(false);
   const [loadingClosings, setLoadingClosings] = useState(false);
+  const [loadingUnidentified, setLoadingUnidentified] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   // Data states
@@ -47,6 +72,8 @@ export default function TesoreriaPage() {
   const [transfers, setTransfers] = useState<TreasuryTransfer[]>([]);
   const [adjustments, setAdjustments] = useState<TreasuryAdjustment[]>([]);
   const [historyClosings, setHistoryClosings] = useState<CashClosing[]>([]);
+  const [unidentified, setUnidentified] = useState<UnidentifiedPayment[]>([]);
+  const [unidentifiedFilter, setUnidentifiedFilter] = useState<'pending' | 'all'>('pending');
 
   // Exchange rates state
   const [liveRates, setLiveRates] = useState<{ usdParallel: number; usdBcv: number } | null>(null);
@@ -59,6 +86,23 @@ export default function TesoreriaPage() {
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [showAdjustmentModal, setShowAdjustmentModal] = useState(false);
   const [showInitialModal, setShowInitialModal] = useState(false);
+  const [showUnidentifiedModal, setShowUnidentifiedModal] = useState(false);
+
+  // Unidentified Payment Form State (Pago por conciliar)
+  const [upCurrency, setUpCurrency] = useState<'USD' | 'VES'>('USD');
+  const [upAmount, setUpAmount] = useState('');
+  const [upMethod, setUpMethod] = useState<string>(PAYMENT_METHODS_BY_CURRENCY.USD[0]);
+  const [upReference, setUpReference] = useState('');
+  const [upDate, setUpDate] = useState(getTodayCaracas());
+  const [upNotes, setUpNotes] = useState('');
+
+  // Reconciliation State
+  const [reconcileTarget, setReconcileTarget] = useState<UnidentifiedPayment | null>(null);
+  const [clientSearch, setClientSearch] = useState('');
+  const [clientResults, setClientResults] = useState<ClientOption[]>([]);
+  const [loadingClients, setLoadingClients] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<ClientOption | null>(null);
+  const [voidTarget, setVoidTarget] = useState<UnidentifiedPayment | null>(null);
 
   // Transfer Form State
   const [transferFrom, setTransferFrom] = useState('binance');
@@ -194,6 +238,20 @@ export default function TesoreriaPage() {
     }
   }, [addToast]);
 
+  // Fetch Unidentified Payments (por conciliar)
+  const fetchUnidentified = useCallback(async () => {
+    setLoadingUnidentified(true);
+    try {
+      const res = await fetch(`/api/treasury/unidentified?status=${unidentifiedFilter}`);
+      const data = await res.json();
+      if (data.data) setUnidentified(data.data);
+    } catch {
+      addToast('Error al cargar pagos por conciliar', 'error');
+    } finally {
+      setLoadingUnidentified(false);
+    }
+  }, [unidentifiedFilter, addToast]);
+
   useEffect(() => {
     fetchBalances();
     fetchRates();
@@ -201,10 +259,38 @@ export default function TesoreriaPage() {
 
   useEffect(() => {
     if (activeTab === 'movements') fetchMovements();
+    if (activeTab === 'unidentified') fetchUnidentified();
     if (activeTab === 'transfers') fetchTransfers();
     if (activeTab === 'adjustments') fetchAdjustments();
     if (activeTab === 'closings') fetchClosings();
-  }, [activeTab, fetchMovements, fetchTransfers, fetchAdjustments, fetchClosings]);
+  }, [activeTab, fetchMovements, fetchUnidentified, fetchTransfers, fetchAdjustments, fetchClosings]);
+
+  // Client search for reconciliation (debounced)
+  useEffect(() => {
+    if (!reconcileTarget || selectedClient) return;
+    const timer = setTimeout(async () => {
+      setLoadingClients(true);
+      try {
+        const res = await fetch(`/api/clients?status=active&limit=20&search=${encodeURIComponent(clientSearch.trim())}`);
+        const data = await res.json();
+        if (data.data) setClientResults(data.data);
+      } catch {
+        addToast('Error al buscar clientes', 'error');
+      } finally {
+        setLoadingClients(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [reconcileTarget, selectedClient, clientSearch, addToast]);
+
+  const totalPendingUsd = useMemo(
+    () =>
+      Object.values(balances)
+        .filter((b) => b.currency === 'USD')
+        .reduce((sum, b) => sum + (b.pendingReconciliation || 0), 0),
+    [balances]
+  );
+  const totalPendingVes = balances.bolivares?.pendingReconciliation || 0;
 
   // Auto-calculate cross-currency transfers (USD <-> VES)
   const isCrossCurrencyTransfer = useMemo(() => {
@@ -253,6 +339,7 @@ export default function TesoreriaPage() {
     const q = movementSearchQuery.toLowerCase().trim();
     const TYPE_LABELS: Record<string, string> = {
       cobro: 'cobro ingreso',
+      por_conciliar: 'por conciliar ingreso no identificado',
       gasto: 'gasto egreso',
       transfer_in: 'transferencia entrada',
       transfer_out: 'transferencia salida',
@@ -445,6 +532,90 @@ export default function TesoreriaPage() {
     }
   }
 
+  function openUnidentifiedModal() {
+    setUpCurrency('USD');
+    setUpAmount('');
+    setUpMethod(PAYMENT_METHODS_BY_CURRENCY.USD[0]);
+    setUpReference('');
+    setUpDate(getTodayCaracas());
+    setUpNotes('');
+    setShowUnidentifiedModal(true);
+  }
+
+  async function handleCreateUnidentified(e: React.FormEvent) {
+    e.preventDefault();
+    const amt = parseFloat(upAmount);
+    if (!amt || amt <= 0) {
+      addToast('El monto debe ser mayor a cero', 'warning');
+      return;
+    }
+    if (upCurrency === 'VES' && !upReference.trim()) {
+      addToast('La referencia es obligatoria para pagos en bolívares', 'warning');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/treasury/unidentified', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currency: upCurrency,
+          amount: amt,
+          paymentMethod: upMethod,
+          reference: upReference.trim() || undefined,
+          paymentDate: Math.floor(new Date(upDate + 'T12:00:00').getTime() / 1000),
+          notes: upNotes.trim() || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        addToast('Pago por conciliar registrado. Ya suma al saldo de la cuenta.', 'success');
+        setShowUnidentifiedModal(false);
+        fetchBalances();
+        if (activeTab === 'unidentified') fetchUnidentified();
+        if (activeTab === 'movements') fetchMovements();
+      } else {
+        addToast(data.error || 'Error al registrar pago por conciliar', 'error');
+      }
+    } catch {
+      addToast('Error de red al registrar pago por conciliar', 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleVoidUnidentified() {
+    if (!voidTarget) return;
+    try {
+      const res = await fetch(`/api/treasury/unidentified/${voidTarget.id}/void`, { method: 'PATCH' });
+      const data = await res.json();
+      if (res.ok) {
+        addToast('Pago por conciliar anulado', 'success');
+        fetchBalances();
+        fetchUnidentified();
+      } else {
+        addToast(data.error || 'Error al anular', 'error');
+      }
+    } catch {
+      addToast('Error de red al anular', 'error');
+    } finally {
+      setVoidTarget(null);
+    }
+  }
+
+  function startReconcile(u: UnidentifiedPayment) {
+    setSelectedClient(null);
+    setClientSearch('');
+    setClientResults([]);
+    setReconcileTarget(u);
+  }
+
+  function closeReconcile() {
+    setReconcileTarget(null);
+    setSelectedClient(null);
+  }
+
   async function handleSubmitCierre(e: React.FormEvent) {
     e.preventDefault();
     if (!zelleActual || !binanceActual || !efectivoActual || !bolivaresActual) {
@@ -514,6 +685,9 @@ export default function TesoreriaPage() {
         <div className={styles.headerActions}>
           <Button variant="secondary" onClick={() => setShowInitialModal(true)}>
             ✏️ Saldos 01/08/2026
+          </Button>
+          <Button variant="secondary" onClick={openUnidentifiedModal}>
+            ❓ Pago por Conciliar
           </Button>
           <Button variant="secondary" onClick={() => setShowTransferModal(true)}>
             🔄 Transferencia
@@ -598,6 +772,14 @@ export default function TesoreriaPage() {
                   <span className={styles.statLabel}>Salidas (-):</span>
                   <span className={styles.statOutflow}>-{isVes ? formatBs(outflows) : formatCurrency(outflows)}</span>
                 </div>
+                {b && b.pendingReconciliation > 0 && (
+                  <div className={styles.statItem} style={{ gridColumn: 'span 2' }}>
+                    <span className={styles.statLabel}>Incluye por conciliar:</span>
+                    <span className={styles.statPending}>
+                      {isVes ? formatBs(b.pendingReconciliation) : formatCurrency(b.pendingReconciliation)}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -611,6 +793,13 @@ export default function TesoreriaPage() {
           onClick={() => setActiveTab('movements')}
         >
           📊 Estado de Cuentas (Movimientos)
+        </button>
+        <button
+          className={`${styles.tabBtn} ${activeTab === 'unidentified' ? styles.tabActive : ''}`}
+          onClick={() => setActiveTab('unidentified')}
+        >
+          ❓ Pagos por Conciliar
+          {(totalPendingUsd > 0 || totalPendingVes > 0) && ' •'}
         </button>
         <button
           className={`${styles.tabBtn} ${activeTab === 'transfers' ? styles.tabActive : ''}`}
@@ -701,6 +890,7 @@ export default function TesoreriaPage() {
                         <td>
                           <span className={styles.badgeReason}>
                             {m.type === 'cobro' && '🟢 Cobro'}
+                            {m.type === 'por_conciliar' && '🟡 Por conciliar'}
                             {m.type === 'gasto' && '🔴 Gasto'}
                             {m.type === 'transfer_in' && '📥 Transf. Entrada'}
                             {m.type === 'transfer_out' && '📤 Transf. Salida'}
@@ -722,6 +912,112 @@ export default function TesoreriaPage() {
                         </td>
                         <td style={{ textAlign: 'right', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
                           {isVes ? formatBs(m.runningBalance) : formatCurrency(m.runningBalance)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab: Pagos por Conciliar */}
+      {activeTab === 'unidentified' && (
+        <div className={styles.panelCard}>
+          <div className={styles.filterRow}>
+            <div className={styles.filterGroup}>
+              <span className={styles.label}>Mostrar:</span>
+              <select
+                className={styles.selectInput}
+                value={unidentifiedFilter}
+                onChange={(e) => setUnidentifiedFilter(e.target.value as 'pending' | 'all')}
+              >
+                <option value="pending">Solo pendientes</option>
+                <option value="all">Todos (incluye conciliados y anulados)</option>
+              </select>
+              {(totalPendingUsd > 0 || totalPendingVes > 0) && (
+                <span className={styles.statPending}>
+                  Pendiente: {formatCurrency(totalPendingUsd)}
+                  {totalPendingVes > 0 && ` · ${formatBs(totalPendingVes)}`}
+                </span>
+              )}
+            </div>
+            <Button variant="primary" onClick={openUnidentifiedModal}>
+              + Registrar Pago por Conciliar
+            </Button>
+          </div>
+
+          {loadingUnidentified ? (
+            <div className={styles.loadingWrap}>
+              <div className={styles.spinner} />
+            </div>
+          ) : unidentified.length === 0 ? (
+            <div className={styles.emptyText}>
+              {unidentifiedFilter === 'pending'
+                ? 'No hay pagos pendientes por conciliar.'
+                : 'No se han registrado pagos por conciliar.'}
+            </div>
+          ) : (
+            <div className={styles.tableContainer}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Método</th>
+                    <th>Referencia / Notas</th>
+                    <th style={{ textAlign: 'right' }}>Monto</th>
+                    <th>Estado</th>
+                    <th style={{ textAlign: 'right' }}>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {unidentified.map((u) => {
+                    const isVes = u.currency === 'VES';
+                    return (
+                      <tr key={u.id}>
+                        <td style={{ whiteSpace: 'nowrap' }}>{formatDate(u.paymentDate)}</td>
+                        <td><strong>{u.paymentMethod}</strong></td>
+                        <td>
+                          {u.reference ? `Ref: ${u.reference}` : '—'}
+                          {u.notes && (
+                            <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>{u.notes}</div>
+                          )}
+                          <div style={{ fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>
+                            por {u.createdByName || 'Admin'}
+                          </div>
+                        </td>
+                        <td className={styles.amountIn} style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                          +{isVes ? formatBs(u.amount) : formatCurrency(u.amount)}
+                        </td>
+                        <td>
+                          {u.status === 'pending' && (
+                            <span className={`${styles.badgeReason} ${styles.badgePending}`}>Pendiente</span>
+                          )}
+                          {u.status === 'reconciled' && (
+                            <>
+                              <span className={`${styles.badgeReason} ${styles.badgeReconciled}`}>Conciliado</span>
+                              {u.reconciledClientName && (
+                                <div style={{ fontSize: '12px', marginTop: '4px' }}>{u.reconciledClientName}</div>
+                              )}
+                            </>
+                          )}
+                          {u.status === 'voided' && (
+                            <span className={`${styles.badgeReason} ${styles.badgeVoided}`}>Anulado</span>
+                          )}
+                        </td>
+                        <td>
+                          {u.status === 'pending' && (
+                            <div className={styles.rowActions}>
+                              <button className={styles.cardActionBtn} onClick={() => startReconcile(u)}>
+                                🔗 Conciliar
+                              </button>
+                              <button className={styles.cardActionBtn} onClick={() => setVoidTarget(u)}>
+                                ✕ Anular
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     );
@@ -1275,6 +1571,192 @@ export default function TesoreriaPage() {
           </div>
         </div>
       )}
+
+      {/* Modal: Registrar Pago por Conciliar */}
+      {showUnidentifiedModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <h3 className={styles.modalTitle}>❓ Registrar Pago por Conciliar</h3>
+            <p className={styles.subtitle} style={{ marginBottom: '12px' }}>
+              Usa esto cuando recibes dinero y aún no sabes de qué cliente es. Suma de inmediato al saldo de la cuenta y
+              luego podrás asignarlo a un cliente desde la pestaña &quot;Pagos por Conciliar&quot;.
+            </p>
+            <form onSubmit={handleCreateUnidentified} className={styles.formGrid}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Moneda</label>
+                  <select
+                    className={styles.selectInput}
+                    value={upCurrency}
+                    onChange={(e) => {
+                      const curr = e.target.value as 'USD' | 'VES';
+                      setUpCurrency(curr);
+                      setUpMethod(PAYMENT_METHODS_BY_CURRENCY[curr][0]);
+                    }}
+                  >
+                    <option value="USD">Dólares (USD)</option>
+                    <option value="VES">Bolívares (VES)</option>
+                  </select>
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Método / Cuenta</label>
+                  <select
+                    className={styles.selectInput}
+                    value={upMethod}
+                    onChange={(e) => setUpMethod(e.target.value)}
+                  >
+                    {PAYMENT_METHODS_BY_CURRENCY[upCurrency].map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Monto ({upCurrency})</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    className={styles.input}
+                    placeholder="0.00"
+                    value={upAmount}
+                    onChange={(e) => setUpAmount(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Fecha de Recepción</label>
+                  <input
+                    type="date"
+                    className={styles.input}
+                    value={upDate}
+                    onChange={(e) => setUpDate(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  Referencia {upCurrency === 'VES' ? '(Obligatoria)' : '(Opcional)'}
+                </label>
+                <input
+                  type="text"
+                  className={styles.input}
+                  placeholder="Ej. 123456"
+                  value={upReference}
+                  onChange={(e) => setUpReference(e.target.value)}
+                  required={upCurrency === 'VES'}
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Notas / Pistas del Origen (Opcional)</label>
+                <textarea
+                  className={styles.textarea}
+                  rows={2}
+                  placeholder="Ej. Zelle a nombre de María P., banco Mercantil..."
+                  value={upNotes}
+                  onChange={(e) => setUpNotes(e.target.value)}
+                />
+              </div>
+
+              <div className={styles.modalFooter}>
+                <Button variant="secondary" type="button" onClick={() => setShowUnidentifiedModal(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" loading={submitting}>
+                  Registrar Ingreso
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Seleccionar cliente para conciliar */}
+      {reconcileTarget && !selectedClient && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <h3 className={styles.modalTitle}>🔗 Conciliar Pago</h3>
+            <p className={styles.subtitle} style={{ marginBottom: '12px' }}>
+              {reconcileTarget.paymentMethod} ·{' '}
+              <strong>
+                {reconcileTarget.currency === 'VES'
+                  ? formatBs(reconcileTarget.amount)
+                  : formatCurrency(reconcileTarget.amount)}
+              </strong>{' '}
+              · {formatDate(reconcileTarget.paymentDate)}
+              {reconcileTarget.reference && ` · Ref: ${reconcileTarget.reference}`}
+            </p>
+            <div className={styles.formGrid}>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>¿A qué cliente pertenece?</label>
+                <input
+                  type="text"
+                  className={styles.input}
+                  placeholder="🔍 Buscar por nombre, clínica o email..."
+                  value={clientSearch}
+                  onChange={(e) => setClientSearch(e.target.value)}
+                  autoFocus
+                />
+              </div>
+
+              {loadingClients ? (
+                <div className={styles.loadingWrap}>
+                  <div className={styles.spinner} />
+                </div>
+              ) : clientResults.length === 0 ? (
+                <div className={styles.emptyText}>No se encontraron clientes.</div>
+              ) : (
+                <div className={styles.clientList}>
+                  {clientResults.map((c) => (
+                    <button key={c.id} type="button" className={styles.clientOption} onClick={() => setSelectedClient(c)}>
+                      <strong>{c.name}</strong>
+                      {c.clinicName && <span className={styles.clientOptionMeta}>{c.clinicName}</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div className={styles.modalFooter}>
+                <Button variant="secondary" type="button" onClick={closeReconcile}>
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Registrar el pago del cliente (FIFO / manual) a partir del ingreso por conciliar */}
+      {reconcileTarget && selectedClient && (
+        <PaymentModal
+          isOpen
+          onClose={closeReconcile}
+          clientId={selectedClient.id}
+          clientName={selectedClient.name}
+          unidentifiedPayment={reconcileTarget}
+          onSuccess={() => {
+            fetchBalances();
+            fetchUnidentified();
+          }}
+        />
+      )}
+
+      <ConfirmDialog
+        isOpen={!!voidTarget}
+        title="Anular pago por conciliar"
+        message="El monto dejará de sumar al saldo de la cuenta. Úsalo solo si el ingreso fue un error o se devolvió. ¿Continuar?"
+        confirmLabel="Sí, anular"
+        variant="danger"
+        onConfirm={handleVoidUnidentified}
+        onCancel={() => setVoidTarget(null)}
+      />
 
       {/* Modal: Configurar Saldos Iniciales al 01/08/2026 */}
       {showInitialModal && (

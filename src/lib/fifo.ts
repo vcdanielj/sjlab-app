@@ -161,6 +161,13 @@ export async function voidPayment(db: DatabaseLike, paymentId: string) {
     .delete(schema.paymentAllocations)
     .where(eq(schema.paymentAllocations.paymentId, paymentId));
 
+  // 5. If the payment came from reconciling an unidentified payment, return it to pending
+  //    (the money is still in the treasury account, it just lost its client)
+  await db
+    .update(schema.unidentifiedPayments)
+    .set({ status: 'pending', reconciledPaymentId: null, reconciledAt: null })
+    .where(eq(schema.unidentifiedPayments.reconciledPaymentId, paymentId));
+
   return true;
 }
 

@@ -233,6 +233,7 @@ export interface TreasuryAccountBalance {
   transfersOut: number;
   adjustmentsIn: number;
   adjustmentsOut: number;
+  pendingReconciliation: number; // Ingresos por conciliar (ya incluidos en inflows)
   currentBalance: number;
 }
 
@@ -267,10 +268,28 @@ export interface TreasuryAdjustment {
   createdAt: number;
 }
 
+export interface UnidentifiedPayment {
+  id: string;
+  currency: 'USD' | 'VES';
+  amount: number;
+  paymentMethod: string;
+  reference?: string | null;
+  paymentDate: number;
+  notes?: string | null;
+  status: 'pending' | 'reconciled' | 'voided';
+  reconciledPaymentId?: string | null;
+  reconciledClientName?: string | null;
+  reconciledAt?: number | null;
+  voidedAt?: number | null;
+  createdBy: string;
+  createdByName?: string;
+  createdAt: number;
+}
+
 export interface AccountMovement {
   id: string;
   date: number;
-  type: 'cobro' | 'gasto' | 'transfer_in' | 'transfer_out' | 'adjustment_in' | 'adjustment_out';
+  type: 'cobro' | 'por_conciliar' | 'gasto' | 'transfer_in' | 'transfer_out' | 'adjustment_in' | 'adjustment_out';
   accountId: string;
   accountName: string;
   currency: 'USD' | 'VES';
